@@ -215,7 +215,9 @@ function lRender(){
       row.className='item luck-item'+(s.checked?' checked':'')+(it.locked?' locked':'');
       const tiers=lTiers(it);const sType=it.titleSelect?'title':it.raceSelect?'race':it.clanSelect?'clan':it.specSelect?'spec':it.runeSelect?'rune':it.statSelect?'stat':it.powerSelect?'power':null;
       let rHTML='';
-      if(it.stepsSelect){
+      if(it.artInput){
+        rHTML=`<div class="item-right" style="min-width:140px"><div class="range-combo"><input type="number" class="num-input" style="width:70px" min="0" max="${it.max}" step="0.5" value="${s.value||0}" id="dai-${it.id}" onclick="event.stopPropagation()"><span class="num-unit">%</span></div></div>`;
+      } else if(it.stepsSelect){
         rHTML=lBuildStepsHTML(it,s);
       } else if(sType){
         const opts=tiers.map(t=>`<option value="${t.value}"${t.label===(s.selectedLabel||'')?' selected':''}>${t.label}</option>`).join('');
@@ -280,15 +282,15 @@ const D_BLESS=[{label:"Not blessed",value:0},{label:"B1 (~+2.5%)",value:2.5},{la
 const D_ACC=[{label:"No accessory / E0",value:0},{label:"E1 (~15%)",value:15},{label:"E2 (~30%)",value:30},{label:"E3 (~45%)",value:45},{label:"E4 (~60%)",value:60},{label:"E5 (~75%)",value:75},{label:"E6 (~85%)",value:85},{label:"E7 (~95%)",value:95},{label:"E8 (~105%)",value:105},{label:"E9 (~110%)",value:110},{label:"E10 Max (~125%)",value:125}];
 const D_POWER=[{label:"None",value:0},{label:"Cursebrand ✦✦ (18–30%)",value:30,range:true,min:18,max:30},{label:"Colossus ✦✦ (20–34%)",value:34,range:true,min:20,max:34},{label:"Apex ✦ (10–20%)",value:20,range:true,min:10,max:20},{label:"Abyssal ✦ (14–24%)",value:24,range:true,min:14,max:24},{label:"Eternal ✦ (13–22%)",value:22,range:true,min:13,max:22},{label:"Reaper (8–16%)",value:16,range:true,min:8,max:16},{label:"Tempest (9–18%)",value:18,range:true,min:9,max:18},{label:"Titanborn (7–14%)",value:14,range:true,min:7,max:14},{label:"Wrathful (5–10%)",value:10,range:true,min:5,max:10},{label:"Infernal (6–12%)",value:12,range:true,min:6,max:12},{label:"Ironclad (7–14%)",value:14,range:true,min:7,max:14},{label:"Battleborn (3–6%)",value:6,range:true,min:3,max:6},{label:"Empowered (4–7%)",value:7,range:true,min:4,max:7},{label:"Resolute (3–7%)",value:7,range:true,min:3,max:7},{label:"Fierce (2–5%)",value:5,range:true,min:2,max:5},{label:"Solid (2–4%)",value:4,range:true,min:2,max:4},{label:"Tempered (3–5%)",value:5,range:true,min:3,max:5}];
 const D_ART_S=[{label:"0%",value:0},{label:"~25%",value:25},{label:"~55%",value:55},{label:"~110%",value:110}];
-const D_SMAP={haki:D_HAKI,conq:D_CONQ,skill:D_SKILL,boss:D_SKILL,tower:D_SKILL,blessing:D_BLESS,accessory:D_ACC,artifact:D_ART_S};
+const D_SMAP={haki:D_HAKI,conq:D_CONQ,skill:D_SKILL,boss:D_SKILL,tower:D_SKILL,blessing:D_BLESS,accessory:D_ACC};
 
 const DMG_GROUPS=[
   {title:"Stat Reroll",items:[{id:"stat",name:"Stat Reroll (DMG)",hint:"Stats Reroll NPC — select your damage stat tier",dmg:0,type:"add",statSelect:true}]},
   {title:"Trait",items:[{id:"trait",name:"Trait",hint:"High-tier traits also apply a global DMG multiplier",dmg:0,type:"add",traitSelect:true}]},
   {title:"Race",items:[{id:"race",name:"Race",hint:"Global DMG% + type multiplier",dmg:0,type:"add",raceSelect:true}]},
   {title:"Clan",items:[{id:"clan",name:"Clan",hint:"Alter / Pride / Espada give the most DMG",dmg:0,type:"add",clanSelect:true}]},
-  {title:"Accessory",items:[{id:"accessory",name:"Accessory Enchant (E0–E10)",hint:"Best-in-slot accessory",dmg:0,type:"add",stepsSelect:"accessory",stepsOnly:true}]},
-  {title:"Artifact",items:[{id:"artifact",name:"Artifact Set Bonus",hint:"Abyssal set — ~110%",dmg:0,type:"add",stepsSelect:"artifact",range:true,min:0,max:110,step:0.5}]},
+  {title:"Accessory",items:[{id:"accessory",name:"Accessory Enchant (E0–E10)",hint:"Best-in-slot accessory",dmg:0,type:"add",stepsSelect:"accessory",stepsOnly:false,range:true,min:0,max:125,step:0.5}]},
+  {title:"Artifact",items:[{id:"artifact",name:"Artifact Set Bonus",hint:"Abyssal set — ~110%",dmg:0,type:"add",artInput:true,min:0,max:110}]},
   {title:"Rune",items:[{id:"rune",name:"Rune",hint:"Select your damage rune then pick upgrade level",dmg:0,type:"add",runeSelect:true}]},
   {title:"Title",items:[{id:"title",name:"Damage Title",hint:"Select your equipped title",dmg:0,type:"add",titleSelect:true}]},
   {title:"Haki",items:[{id:"haki",name:"Armament Haki",hint:"Unlocked on Snow Island",dmg:0,type:"add",stepsSelect:"haki",stepsOnly:true}]},
@@ -334,7 +336,9 @@ function dmgRender(){
       const s=dS[it.id];const row=document.createElement('div');row.className='item dmg-item'+(s.checked?' checked':'');
       const tiers=dTiers(it);const sType=it.titleSelect?'title':it.raceSelect?'race':it.clanSelect?'clan':it.specSelect?'spec':it.runeSelect?'rune':it.statSelect?'stat':it.traitSelect?'trait':it.auraSelect?'aura':it.cosmeticSelect?'cosmetic':it.powerSelect?'power':null;
       let rHTML='';
-      if(it.stepsSelect){
+      if(it.artInput){
+        rHTML=`<div class="item-right" style="min-width:140px"><div class="range-combo"><input type="number" class="num-input" style="width:70px" min="0" max="${it.max}" step="0.5" value="${s.value||0}" id="dai-${it.id}" onclick="event.stopPropagation()"><span class="num-unit">%</span></div></div>`;
+      } else if(it.stepsSelect){
         const steps=D_SMAP[it.stepsSelect];let ci=0;steps.forEach((st,i)=>{if(st.value<=s.value)ci=i;});
         const opts=steps.map((st,i)=>`<option value="${st.value}"${i===ci?' selected':''}>${st.label}</option>`).join('');
         const sliderHTML=it.range?`<div class="range-combo" style="margin-top:4px"><input type="range" min="${it.min||0}" max="${it.max||100}" step="${it.step||1}" value="${s.value||0}" id="dslr-${it.id}" onclick="event.stopPropagation()"><input type="number" class="num-input" min="${it.min||0}" max="${it.max||100}" step="${it.step||1}" value="${s.value||0}" id="dslrn-${it.id}" onclick="event.stopPropagation()"><span class="num-unit">%</span></div>`:'';
@@ -352,9 +356,14 @@ function dmgRender(){
 
       row.innerHTML=`<div class="cb">${CB}</div><div class="item-body"><div class="item-name">${it.name}</div><div class="item-hint">${it.hint}</div></div>${rHTML}`;
 
-      if(it.stepsSelect){
+      if(it.artInput){
+        const ni=row.querySelector(`#dai-${it.id}`);
+        ni.addEventListener('input',e=>{let v=parseFloat(e.target.value)||0;if(v>it.max)v=it.max;s.value=v;s.checked=v>0;row.classList.toggle('checked',s.checked);dmgUpdatePanel();});
+        ni.addEventListener('blur',e=>{let v=parseFloat(e.target.value)||0;if(v>it.max){v=it.max;ni.value=v;}s.value=v;s.checked=v>0;row.classList.toggle('checked',s.checked);dmgUpdatePanel();});
+        row.addEventListener('click',ev=>{if(ev.target===ni||ni.contains(ev.target))return;if(s.value>0){s.checked=!s.checked;row.classList.toggle('checked',s.checked);dmgUpdatePanel();}});
+      } else if(it.stepsSelect){
         const ss=row.querySelector(`#ds-${it.id}`),sl=row.querySelector(`#dslr-${it.id}`),ni=row.querySelector(`#dslrn-${it.id}`);
-        function dSyncSlider(v){v=Math.min(Math.max(v,it.min||0),it.max||100);s.value=v;if(sl)sl.value=v;if(ni)ni.value=v;s.checked=v>0;row.classList.toggle('checked',s.checked);const steps=D_SMAP[it.stepsSelect];let bi=0;steps.forEach((st,i)=>{if(st.value<=v)bi=i;});ss.selectedIndex=bi;dmgUpdatePanel();}
+        function dSyncSlider(v){const dMax=it.max||(D_SMAP[it.stepsSelect]?.slice(-1)[0]?.value||100);v=Math.min(Math.max(v,it.min||0),dMax);s.value=v;if(sl)sl.value=v;if(ni)ni.value=v;s.checked=v>0;row.classList.toggle('checked',s.checked);const steps=D_SMAP[it.stepsSelect];let bi=0;steps.forEach((st,i)=>{if(st.value<=v)bi=i;});ss.selectedIndex=bi;dmgUpdatePanel();}
         ss.addEventListener('change',e=>dSyncSlider(parseFloat(e.target.value)));
         if(sl)sl.addEventListener('input',e=>dSyncSlider(parseFloat(e.target.value)));
         if(ni){ni.addEventListener('input',e=>{const v=parseFloat(e.target.value);if(!isNaN(v))dSyncSlider(v);});ni.addEventListener('blur',e=>{const v=parseFloat(e.target.value);dSyncSlider(isNaN(v)?s.value:v);});}
@@ -374,6 +383,12 @@ function dmgRender(){
         if(sr){function dSS(v){v=clamp(v,0,s.value||30);s.specRangeVal=v;sr.value=v;if(srn)srn.value=v;dmgUpdatePanel();}sr.addEventListener('input',e=>dSS(parseFloat(e.target.value)));if(srn){srn.addEventListener('input',e=>{const v=parseFloat(e.target.value);if(!isNaN(v))dSS(v);});srn.addEventListener('blur',e=>{const v=parseFloat(e.target.value);dSS(isNaN(v)?(s.specRangeVal||0):v);});}}
         if(ru)ru.addEventListener('change',e=>{s.value=parseFloat(e.target.value);s.checked=s.value>0;row.classList.toggle('checked',s.checked);dmgUpdatePanel();});
         row.addEventListener('click',ev=>{if([sel,sr,srn,ru].filter(Boolean).some(el=>ev.target===el||el.contains(ev.target))&&ev.target!==row)return;if(s.checked||s.value>0){s.checked=!s.checked;row.classList.toggle('checked',s.checked);dmgUpdatePanel();}});
+      } else if(it.plainRange){
+        const pr=row.querySelector(`#dpr-${it.id}`),prn=row.querySelector(`#dprn-${it.id}`);
+        function dSyncPR(v){v=Math.min(Math.max(v,it.min||0),it.max||110);s.value=v;pr.value=v;if(prn)prn.value=v;s.checked=v>0;row.classList.toggle('checked',s.checked);dmgUpdatePanel();}
+        pr.addEventListener('input',e=>dSyncPR(parseFloat(e.target.value)));
+        if(prn){prn.addEventListener('input',e=>{const v=parseFloat(e.target.value);if(!isNaN(v))dSyncPR(v);});prn.addEventListener('blur',e=>{const v=parseFloat(e.target.value);dSyncPR(isNaN(v)?s.value:v);});}
+        row.addEventListener('click',ev=>{if([pr,prn].some(el=>ev.target===el||el.contains(ev.target)))return;if(s.value>0){s.checked=!s.checked;row.classList.toggle('checked',s.checked);dmgUpdatePanel();}});
       } else {row.addEventListener('click',()=>{s.checked=!s.checked;row.classList.toggle('checked',s.checked);dmgUpdatePanel();});}
       list.appendChild(row);
     });
