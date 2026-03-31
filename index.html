@@ -172,13 +172,13 @@ const LUCK_GROUPS=[
 const lS={};
 LUCK_GROUPS.forEach(g=>g.items.forEach(it=>{lS[it.id]={checked:!!it.locked,value:it.luck,type:it.type,locked:!!it.locked};}));
 
-function lCalc(){let a=0,m=1;LUCK_GROUPS.forEach(g=>g.items.forEach(it=>{const s=lS[it.id];if(!s.checked)return;if(s.type==='add')a+=(it.id==='lpower'&&s.specRangeVal!==undefined?s.specRangeVal:s.value);else m*=s.value;}));return{add:a,total:a*m};}
+function lCalc(){let a=0,m=1;LUCK_GROUPS.forEach(g=>g.items.forEach(it=>{const s=lS[it.id];if(!s.checked)return;if(s.type==='add'){const v=(it.id==='spec'||it.id==='lpower')&&s.specRangeVal!==undefined?s.specRangeVal:s.value;a+=v;}else m*=s.value;}));return{add:a,total:a*m};}
 
 function lUpdatePanel(){
   const el=document.getElementById('luck-brows');el.innerHTML='';
   LUCK_GROUPS.forEach(g=>g.items.forEach(it=>{
     const s=lS[it.id];const r=document.createElement('div');r.className='brow';
-    const lav=it.id==='lpower'&&s.specRangeVal!==undefined?s.specRangeVal:s.value;
+    const lav=(it.id==='spec'||it.id==='lpower')&&s.specRangeVal!==undefined?s.specRangeVal:s.value;
     let vt,vc;
     if(!s.checked||lav===0){vt=s.type==='mult'?'×—':'+—';vc='bv off';}
     else if(s.type==='mult'){vt='×'+lav.toFixed(1);vc='bv blue';}
@@ -241,17 +241,41 @@ function lRender(){
         if(ni){ni.addEventListener('input',e=>{const v=parseFloat(e.target.value);if(!isNaN(v))lSyncS(v);});ni.addEventListener('blur',e=>{const v=parseFloat(e.target.value);lSyncS(isNaN(v)?s.value:v);});}
         row.addEventListener('click',ev=>{if([ss,sl,ni].filter(Boolean).some(el=>ev.target===el||el.contains(ev.target)))return;if(s.value>0){s.checked=!s.checked;row.classList.toggle('checked',s.checked);lUpdatePanel();}});
       } else if(sType){
-        const sel=row.querySelector(`#lsel-${it.id}`),sr=row.querySelector(`#lsr-${it.id}`),srn=row.querySelector(`#lsrn-${it.id}`),ru=row.querySelector(`#lru-${it.id}`);
+        const sel=row.querySelector(`#lsel-${it.id}`),ru=row.querySelector(`#lru-${it.id}`);
+        const ir=row.querySelector('.item-right');
+
+        function lAttachSlider(){
+          const sr=row.querySelector(`#lsr-${it.id}`),srn=row.querySelector(`#lsrn-${it.id}`);
+          if(!sr)return;
+          function lSyncSR(v){v=clamp(v,s.specMin||0,s.value||15);s.specRangeVal=v;sr.value=v;if(srn)srn.value=v;lUpdatePanel();}
+          sr.addEventListener('input',e=>lSyncSR(parseFloat(e.target.value)));
+          if(srn){
+            srn.addEventListener('input',e=>{const v=parseFloat(e.target.value);if(!isNaN(v)&&v>=s.specMin&&v<=s.value){s.specRangeVal=v;sr.value=v;lUpdatePanel();}});
+            srn.addEventListener('blur',e=>{const v=parseFloat(e.target.value);lSyncSR(isNaN(v)?s.specRangeVal:v);});
+          }
+        }
+
         sel.addEventListener('change',e=>{
           const ch=tiers.find(t=>t.label===e.target.options[e.target.selectedIndex].text);s.selectedLabel=ch?ch.label:'';
-          if((sType==='spec'||sType==='power')&&ch&&ch.range){s.specMin=ch.min;s.specRangeVal=ch.max;s.value=ch.max;}
-          else if(sType==='rune'){s.runeKey=ch&&ch.key?ch.key:null;s.value=ch?(ch.steps?ch.steps[ch.steps.length-1]:ch.value):0;}
-          else{s.value=parseFloat(e.target.value);}
-          s.checked=s.value>0;row.classList.toggle('checked',s.checked);lRender();lUpdatePanel();
+          if((sType==='spec'||sType==='power')&&ch&&ch.range){
+            s.specMin=ch.min;s.value=ch.max;s.specRangeVal=ch.min;
+            const old=ir.querySelector('.range-combo');if(old)old.remove();
+            const rc=document.createElement('div');rc.className='range-combo';rc.style.marginTop='4px';
+            rc.innerHTML=`<input type="range" min="${ch.min}" max="${ch.max}" step="0.1" value="${ch.min}" id="lsr-${it.id}" onclick="event.stopPropagation()"><input type="number" class="num-input" min="${ch.min}" max="${ch.max}" step="0.1" value="${ch.min}" id="lsrn-${it.id}" onclick="event.stopPropagation()"><span class="num-unit">%</span>`;
+            ir.appendChild(rc);lAttachSlider();
+          } else if(sType==='rune'){
+            s.runeKey=ch&&ch.key?ch.key:null;s.value=ch?(ch.steps?ch.steps[ch.steps.length-1]:ch.value):0;
+            lRender();lUpdatePanel();return;
+          } else {
+            s.value=parseFloat(e.target.value)||0;
+            const old=ir.querySelector('.range-combo');if(old)old.remove();
+          }
+          s.checked=s.value>0;row.classList.toggle('checked',s.checked);lUpdatePanel();
         });
-        if(sr){function lSyncSR(v){v=clamp(v,s.specMin||0,s.value||15);s.specRangeVal=v;sr.value=v;if(srn)srn.value=v;lUpdatePanel();}sr.addEventListener('input',e=>lSyncSR(parseFloat(e.target.value)));if(srn){srn.addEventListener('input',e=>{const v=parseFloat(e.target.value);if(!isNaN(v))lSyncSR(v);});srn.addEventListener('blur',e=>{const v=parseFloat(e.target.value);lSyncSR(isNaN(v)?(s.specRangeVal||0):v);});}}
+
+        lAttachSlider();
         if(ru)ru.addEventListener('change',e=>{s.value=parseFloat(e.target.value);s.checked=s.value>0;row.classList.toggle('checked',s.checked);lUpdatePanel();});
-        row.addEventListener('click',ev=>{if([sel,sr,srn,ru].filter(Boolean).some(el=>ev.target===el||el.contains(ev.target)))return;if(s.value>0){s.checked=!s.checked;row.classList.toggle('checked',s.checked);lUpdatePanel();}});
+        row.addEventListener('click',ev=>{const kids=[sel,row.querySelector(`#lsr-${it.id}`),row.querySelector(`#lsrn-${it.id}`),ru].filter(Boolean);if(kids.some(el=>ev.target===el||el.contains(ev.target)))return;if(s.value>0){s.checked=!s.checked;row.classList.toggle('checked',s.checked);lUpdatePanel();}});
       } else if(!it.locked){
         row.addEventListener('click',()=>{s.checked=!s.checked;row.classList.toggle('checked',s.checked);lUpdatePanel();});
       }
