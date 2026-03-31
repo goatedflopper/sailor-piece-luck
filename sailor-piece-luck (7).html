@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sailor Piece — Luck Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #f5c842;
+    --gold-dim: #c99e2a;
+    --dark: #0b0d10;
+    --dark2: #111419;
+    --dark3: #181c22;
+    --dark4: #1f242d;
+    --border: rgba(245,200,66,0.18);
+    --border2: rgba(255,255,255,0.07);
+    --text: #e8e4d8;
+    --muted: #7a7d85;
+    --blue: #7eb8ff;
+    --red: #e05050;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; min-height: 100vh; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(245,200,66,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(245,200,66,0.025) 1px, transparent 1px);
+    background-size: 40px 40px; pointer-events: none; z-index: 0;
+  }
+  .page { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  header { text-align: center; margin-bottom: 40px; animation: fadeUp 0.4s ease both; }
+  .logo-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px; }
+  .logo-icon { width: 42px; height: 42px; background: var(--gold); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  h1 { font-family: 'Bebas Neue', sans-serif; font-size: 50px; letter-spacing: 0.04em; color: var(--gold); line-height: 1; }
+  .tagline { color: var(--muted); font-size: 13px; letter-spacing: 0.07em; text-transform: uppercase; }
+
+  .layout { display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start; }
+  @media(max-width:640px){ .layout { grid-template-columns: 1fr; } }
+
+  /* Panel */
+  .panel { background: var(--dark2); border: 1px solid var(--border); border-radius: 18px; padding: 22px; position: sticky; top: 20px; animation: fadeUp 0.4s 0.1s ease both; }
+  .panel-title { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+  .brow { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border2); font-size: 13px; }
+  .brow:last-child { border-bottom: none; }
+  .bl { color: var(--muted); }
+  .bv { font-weight: 500; font-variant-numeric: tabular-nums; }
+  .bv.gold { color: var(--gold); }
+  .bv.blue { color: var(--blue); }
+  .bv.off { color: var(--muted); opacity: 0.35; }
+  .total-row { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: baseline; }
+  .total-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .total-num { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--red); }
+  .bar-wrap { margin-top: 12px; }
+  .bar-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+  .bar-track { height: 6px; background: var(--dark4); border-radius: 99px; overflow: hidden; border: 1px solid var(--border2); }
+  .bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); transition: width 0.4s cubic-bezier(.4,0,.2,1); }
+  .reset-btn { width: 100%; margin-top: 12px; font-size: 12px; color: var(--muted); background: none; border: 1px solid var(--border2); border-radius: 8px; padding: 7px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+  .reset-btn:hover { color: var(--text); border-color: var(--border); }
+
+  /* Checklist */
+  .checklist { animation: fadeUp 0.4s 0.15s ease both; }
+  .group { margin-bottom: 14px; }
+  .group-head { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; padding: 0 2px; }
+  .group-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); white-space: nowrap; }
+  .group-line { flex: 1; height: 1px; background: var(--border2); }
+  .item-list { background: var(--dark2); border: 1px solid var(--border2); border-radius: 14px; overflow: hidden; }
+  .item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-bottom: 1px solid var(--border2); cursor: pointer; transition: background 0.15s; user-select: none; }
+  .item:last-child { border-bottom: none; }
+  .item:hover { background: var(--dark3); }
+  .item.checked { background: rgba(245,200,66,0.04); }
+  .item.locked { cursor: default; }
+  .cb { width: 21px; height: 21px; flex-shrink: 0; border: 1.5px solid rgba(255,255,255,0.18); border-radius: 7px; display: flex; align-items: center; justify-content: center; transition: all 0.18s; }
+  .item.checked .cb { background: var(--gold); border-color: var(--gold); }
+  .item.locked .cb { opacity: 0.4; }
+  .cb svg { display: none; }
+  .item.checked .cb svg { display: block; }
+  .item-body { flex: 1; min-width: 0; }
+  .item-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .item.checked .item-name { color: var(--gold); }
+  .item-hint { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .item-right { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+  .ipct { font-family: 'Bebas Neue', sans-serif; font-size: 19px; color: var(--muted); transition: color 0.2s; }
+  .item.checked .ipct { color: var(--gold); }
+  .ipct.mult { color: #3a6fa0; }
+  .item.checked .ipct.mult { color: var(--blue); }
+
+  /* Title / select */
+  .title-select {
+    width: 100%; background: var(--dark4); color: var(--text);
+    border: 1px solid var(--border2); border-radius: 8px;
+    padding: 6px 10px; font-family: 'DM Sans', sans-serif; font-size: 13px;
+    cursor: pointer; outline: none; margin-top: 2px;
+  }
+  .title-select:focus { border-color: var(--gold-dim); }
+
+  /* Range + number input combo */
+  .range-combo { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+  input[type=range] { width: 74px; cursor: pointer; -webkit-appearance: none; appearance: none; height: 4px; background: var(--dark4); border-radius: 99px; outline: none; border: 1px solid var(--border2); }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--gold); cursor: pointer; }
+  .num-input {
+    width: 52px; background: var(--dark4); color: var(--gold);
+    border: 1px solid var(--border2); border-radius: 6px;
+    padding: 3px 6px; font-family: 'DM Sans', sans-serif; font-size: 12px;
+    text-align: center; outline: none;
+  }
+  .num-input:focus { border-color: var(--gold-dim); }
+  .num-unit { font-size: 11px; color: var(--muted); }
+
+  /* Steps indicator (dungeon / tower / skill-tree upgrades) */
+  .steps-wrap { width: 100%; margin-top: 6px; }
+  .steps-row { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-bottom: 3px; }
+  .steps-ticks { display: flex; justify-content: space-between; padding: 0 1px; }
+  .step-tick { width: 2px; height: 6px; background: var(--border2); border-radius: 1px; transition: background 0.15s; }
+  .step-tick.active { background: var(--gold-dim); }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  footer { text-align: center; margin-top: 40px; color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="logo-row">
+      <div class="logo-icon">🍀</div>
+      <h1>Luck Tracker</h1>
+    </div>
+    <p class="tagline">Sailor Piece · Max Luck Calculator</p>
+  </header>
+
+  <div class="layout">
+    <div class="checklist" id="checklist"></div>
+    <div class="panel">
+      <div class="panel-title">— Breakdown —</div>
+      <div id="brows"></div>
+      <div class="total-row">
+        <span class="total-label">Total</span>
+        <span class="total-num" id="total-num">100%</span>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-labels"><span>Additive progress</span><span id="bar-txt">100%</span></div>
+        <div class="bar-track"><div class="bar-fill" id="bar" style="width:0%"></div></div>
+      </div>
+      <button class="reset-btn" onclick="resetAll()">Reset all</button>
+    </div>
+  </div>
+
+  <footer>Values from in-game screenshots</footer>
+</div>
+
+<script>
+const TITLE_TIERS = [
+  { label: "None", value: 0 },
+  { label: "Lucky Novice (+10%)", value: 10 },
+  { label: "Fortune Seeker (+12.5%)", value: 12.5 },
+  { label: "Lucky Star (+15%)", value: 15 },
+  { label: "Blessed One (+20%)", value: 20 },
+  { label: "The Chosen One (+25%)", value: 25 },
+  { label: "Blessed Sovereign (+32.5%)", value: 32.5 },
+  { label: "Destiny Marked (+40%)", value: 40 },
+  { label: "Celestial Favor (+50%)", value: 50 },
+];
+
+// Only races that give luck
+const RACE_TIERS = [
+  { label: "None / No luck race", value: 0 },
+  { label: "Kitsune (Mythical) — +25% Luck ★", value: 25 },
+];
+
+// Only clans that give luck
+const CLAN_TIERS = [
+  { label: "None / No luck clan", value: 0 },
+  { label: "Monarch — +10% Luck ★", value: 10 },
+  { label: "Alter — +10% Luck ★", value: 10 },
+  { label: "Eminence — +12.5% Luck ★", value: 12.5 },
+];
+
+const SPEC_TIERS = [
+  { label: "None", value: 0 },
+  { label: "Fortune Chosen — up to +10%", value: 10, range:true, min:0, max:10 },
+  { label: "Luck V — +7.5% to +15%", value: 15, range:true, min:7.5, max:15 },
+];
+
+// Rune select — pick one rune, both give different max luck
+const RUNE_TIERS = [
+  { label: "None", value: 0 },
+  { label: "Radiant Rune — Max ~28%", value: 28, steps: [0,4,8,12,16,20,24,28], key:"radiant" },
+  { label: "Fortune Rune — Max 16%", value: 16, steps: [0,4,8,12,16], key:"fortune" },
+];
+
+// Stat reroll tiers
+const STAT_TIERS = [
+  { label: "None / F tier (0%)", value: 0 },
+  { label: "E tier (+2%)", value: 2 },
+  { label: "D tier (+4%)", value: 4 },
+  { label: "C tier (+6%)", value: 6 },
+  { label: "B tier (+8%)", value: 8 },
+  { label: "A tier (+10%)", value: 10 },
+  { label: "S tier (+12%)", value: 12 },
+];
+
+// Boss Rush upgrade steps
+const BOSS_STEPS = [
+  { label: "0 upgrades", value: 0 },
+  { label: "~3%", value: 3 },
+  { label: "~6%", value: 6 },
+  { label: "~9%", value: 9 },
+  { label: "~12%", value: 12 },
+  { label: "Max (15%)", value: 15 },
+];
+
+// Infinite Tower upgrade steps
+const TOWER_STEPS = [
+  { label: "0 upgrades", value: 0 },
+  { label: "~3%", value: 3 },
+  { label: "~6%", value: 6 },
+  { label: "~9%", value: 9 },
+  { label: "~12%", value: 12 },
+  { label: "Max (15%)", value: 15 },
+];
+
+// Skill Tree upgrade steps
+const SKILL_STEPS = [
+  { label: "0 upgrades", value: 0 },
+  { label: "~5%", value: 5 },
+  { label: "~10%", value: 10 },
+  { label: "~15%", value: 15 },
+  { label: "~20%", value: 20 },
+  { label: "Max (25%)", value: 25 },
+];
+
+const GROUPS = [
+  { title:"Base", items:[
+    { id:"base", name:"Base Luck", hint:"Always active — starting luck", luck:100, type:"add", locked:true },
+  ]},
+  { title:"Stat Reroll", items:[
+    { id:"stat", name:"Stat Reroll (luck)", hint:"Stats Reroll NPC at Sailor Island — select your tier", luck:0, type:"add", statSelect:true },
+  ]},
+  { title:"Title", items:[
+    { id:"title", name:"Luck Title", hint:"Select your equipped title tier", luck:0, type:"add", titleSelect:true },
+  ]},
+  { title:"Race", items:[
+    { id:"race", name:"Race", hint:"Only Kitsune gives luck — select your race", luck:0, type:"add", raceSelect:true },
+  ]},
+  { title:"Clan", items:[
+    { id:"clan", name:"Clan", hint:"Monarch / Alter / Eminence give luck — select yours", luck:0, type:"add", clanSelect:true },
+  ]},
+  { title:"Ascend", items:[
+    { id:"asc", name:"Ascension Level", hint:"Each level gives +5% luck — Killua NPC at Sailor Island", luck:0, type:"add", stepsSelect:"asc", stepsOnly:true },
+  ]},
+  { title:"Rune Dungeons", items:[
+    { id:"rune", name:"Rune", hint:"Select your rune type then pick upgrade tier", luck:0, type:"add", runeSelect:true },
+  ]},
+  { title:"Skill Tree", items:[
+    { id:"skill", name:"Skill Tree Luck", hint:"Skill Tree NPC at Slime Island (lvl 7000+) — pick upgrade tier", luck:0, type:"add", stepsSelect:"skill", stepsOnly:true },
+  ]},
+  { title:"Spec Passive", items:[
+    { id:"spec", name:"Spec Passive", hint:"Select which luck passive you have equipped", luck:0, type:"add", specSelect:true },
+  ]},
+  { title:"Boss Rush", items:[
+    { id:"boss", name:"Boss Rush Luck", hint:"Boss Rush Upgrades NPC, Sailor Island — pick upgrade tier", luck:0, type:"add", stepsSelect:"boss", range:true, min:0, max:15, step:0.5 },
+  ]},
+  { title:"Infinite Tower", items:[
+    { id:"tower", name:"Infinite Tower Luck", hint:"Tower Upgrades NPC at Tower Island — pick upgrade tier", luck:0, type:"add", stepsSelect:"tower", range:true, min:0, max:15, step:0.5 },
+  ]},
+  { title:"Gamepass", items:[
+    { id:"gp", name:"2x Luck Pass", hint:"649 Robux — multiplies total luck ×2", luck:2, type:"mult" },
+  ]},
+  { title:"Event", items:[
+    { id:"ev", name:"Event x2 Luck", hint:"Dev-hosted weekend events", luck:2, type:"mult" },
+  ]},
+];
+
+const ADD_MAX = 337.5;
+
+const ASC_STEPS = [
+  { label: "0 — No ascension", value: 0 },
+  { label: "Level 1 (+5%)", value: 5 },
+  { label: "Level 2 (+10%)", value: 10 },
+  { label: "Level 3 (+15%)", value: 15 },
+  { label: "Level 4 (+20%)", value: 20 },
+  { label: "Level 5 (+25%)", value: 25 },
+  { label: "Level 6 (+30%)", value: 30 },
+  { label: "Level 7 (+35%)", value: 35 },
+  { label: "Level 8 — Max (+40%)", value: 40 },
+];
+
+const STEPS_MAP = {
+  asc: ASC_STEPS,
+  boss: BOSS_STEPS,
+  tower: TOWER_STEPS,
+  skill: SKILL_STEPS,
+};
+
+const state = {};
+GROUPS.forEach(g => g.items.forEach(it => {
+  state[it.id] = { checked: !!it.locked, value: it.luck, type: it.type, locked: !!it.locked };
+}));
+
+function calcTotals() {
+  let add = 0, mult = 1;
+  GROUPS.forEach(g => g.items.forEach(it => {
+    const s = state[it.id];
+    if (!s.checked) return;
+    if (s.type === 'add') add += s.value;
+    else mult *= s.value;
+  }));
+  return { add, mult, total: add * mult };
+}
+
+function updatePanel() {
+  const rowsEl = document.getElementById('brows');
+  rowsEl.innerHTML = '';
+  GROUPS.forEach(g => g.items.forEach(it => {
+    const s = state[it.id];
+    const row = document.createElement('div');
+    row.className = 'brow';
+    let valTxt, valCls;
+    if (!s.checked || s.value === 0) {
+      valTxt = s.type === 'mult' ? '×—' : '+—';
+      valCls = 'bv off';
+    } else if (s.type === 'mult') {
+      valTxt = '×' + s.value.toFixed(1);
+      valCls = 'bv blue';
+    } else {
+      valTxt = '+' + s.value.toFixed(1) + '%';
+      valCls = 'bv gold';
+    }
+    row.innerHTML = `<span class="bl">${it.name}</span><span class="${valCls}">${valTxt}</span>`;
+    rowsEl.appendChild(row);
+  }));
+
+  const { add, total } = calcTotals();
+  document.getElementById('total-num').textContent = total.toFixed(1) + '%';
+  const pct = Math.min((add / ADD_MAX) * 100, 100);
+  document.getElementById('bar').style.width = pct.toFixed(1) + '%';
+  document.getElementById('bar-txt').textContent = add.toFixed(1) + '%';
+}
+
+function clamp(v, min, max) { return Math.min(Math.max(v, min), max); }
+
+function buildStepsHTML(it, s) {
+  const steps = STEPS_MAP[it.stepsSelect];
+  const curVal = s.value;
+  let closestIdx = 0;
+  steps.forEach((st, i) => { if (st.value <= curVal) closestIdx = i; });
+  const stepsOpts = steps.map((st, i) =>
+    `<option value="${st.value}"${i === closestIdx && curVal === st.value ? ' selected' : ''}>${st.label}</option>`
+  ).join('');
+  if (it.stepsOnly) {
+    return `<div class="item-right" style="min-width:160px">
+      <select class="title-select" id="step-${it.id}" onclick="event.stopPropagation()">${stepsOpts}</select>
+    </div>`;
+  }
+  return `
+    <div class="item-right" style="min-width:200px">
+      <select class="title-select" id="step-${it.id}" onclick="event.stopPropagation()">${stepsOpts}</select>
+      <div class="range-combo" style="margin-top:4px">
+        <input type="range" min="${it.min}" max="${it.max}" step="${it.step}" value="${curVal}" id="sl-${it.id}" onclick="event.stopPropagation()">
+        <input type="number" class="num-input" min="${it.min}" max="${it.max}" step="${it.step}" value="${curVal}" id="ni-${it.id}" onclick="event.stopPropagation()">
+        <span class="num-unit">%</span>
+      </div>
+    </div>`;
+}
+
+function buildRangeHTML(it, s) {
+  const curVal = s.specRangeVal !== undefined ? s.specRangeVal : s.value;
+  return `
+    <div class="item-right">
+      <div class="ipct" id="pct-${it.id}">+${s.value.toFixed(1)}%</div>
+      <div class="range-combo">
+        <input type="range" min="${it.min}" max="${it.max}" step="${it.step}" value="${s.value}" id="sl-${it.id}" onclick="event.stopPropagation()">
+        <input type="number" class="num-input" min="${it.min}" max="${it.max}" step="${it.step}" value="${s.value}" id="ni-${it.id}" onclick="event.stopPropagation()">
+        <span class="num-unit">%</span>
+      </div>
+    </div>`;
+}
+
+function renderChecklist() {
+  const container = document.getElementById('checklist');
+  container.innerHTML = '';
+  GROUPS.forEach((group) => {
+    const div = document.createElement('div');
+    div.className = 'group';
+    const head = document.createElement('div');
+    head.className = 'group-head';
+    head.innerHTML = `<span class="group-name">${group.title}</span><span class="group-line"></span>`;
+    div.appendChild(head);
+
+    const list = document.createElement('div');
+    list.className = 'item-list';
+
+    group.items.forEach(it => {
+      const s = state[it.id];
+      const row = document.createElement('div');
+      const isMult = it.type === 'mult';
+      row.className = 'item' + (s.checked ? ' checked' : '') + (it.locked ? ' locked' : '');
+
+      let rightHTML;
+      const selectType = it.titleSelect ? 'title' : it.raceSelect ? 'race' : it.clanSelect ? 'clan' : it.specSelect ? 'spec' : it.runeSelect ? 'rune' : it.statSelect ? 'stat' : null;
+      const selectTiers = selectType === 'title' ? TITLE_TIERS : selectType === 'race' ? RACE_TIERS : selectType === 'clan' ? CLAN_TIERS : selectType === 'spec' ? SPEC_TIERS : selectType === 'rune' ? RUNE_TIERS : selectType === 'stat' ? STAT_TIERS : null;
+
+      if (it.stepsSelect) {
+        // Steps select + range + number input
+        rightHTML = buildStepsHTML(it, s);
+      } else if (selectType) {
+        const opts = selectTiers.map(t =>
+          `<option value="${t.value}"${t.value === s.value && t.label === (s.selectedLabel||'') ? ' selected' : ''}>${t.label}</option>`
+        ).join('');
+        const specRangeBlock = (selectType === 'spec' && s.value > 0) ? `
+          <div class="range-combo" style="margin-top:4px">
+            <input type="range" min="${s.specMin||0}" max="${s.value}" step="0.1" value="${s.specRangeVal||s.value}" id="sr-${it.id}" onclick="event.stopPropagation()">
+            <input type="number" class="num-input" min="${s.specMin||0}" max="${s.value}" step="0.1" value="${s.specRangeVal||s.value}" id="srn-${it.id}" onclick="event.stopPropagation()">
+            <span class="num-unit">%</span>
+          </div>` : '';
+        // Rune upgrade tier sub-select
+        let runeUpgradeBlock = '';
+        if (selectType === 'rune' && s.runeKey) {
+          const chosen = RUNE_TIERS.find(t => t.key === s.runeKey);
+          if (chosen && chosen.steps) {
+            const stepOpts = chosen.steps.map(v => `<option value="${v}"${v === s.value ? ' selected' : ''}>${v === chosen.steps[chosen.steps.length-1] ? 'Max ('+v+'%)' : v === 0 ? '0 upgrades' : '~'+v+'%'}</option>`).join('');
+            runeUpgradeBlock = `<div style="margin-top:4px"><select class="title-select" id="runeup-${it.id}" onclick="event.stopPropagation()">${stepOpts}</select></div>`;
+          }
+        }
+        rightHTML = `<div class="item-right" style="min-width:200px">
+          <select class="title-select" id="sel-${it.id}" onclick="event.stopPropagation()">${opts}</select>
+          ${specRangeBlock}${runeUpgradeBlock||''}
+        </div>`;
+      } else if (it.range) {
+        rightHTML = buildRangeHTML(it, s);
+      } else {
+        const pctTxt = isMult ? '×' + it.luck.toFixed(1) : '+' + it.luck + '%';
+        rightHTML = `<div class="ipct${isMult?' mult':''}">${pctTxt}</div>`;
+      }
+
+      row.innerHTML = `
+        <div class="cb"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0b0d10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-body"><div class="item-name">${it.name}</div><div class="item-hint">${it.hint}</div></div>
+        ${rightHTML}
+      `;
+
+      // ---- Steps select listeners ----
+      if (it.stepsSelect) {
+        const stepSel = row.querySelector(`#step-${it.id}`);
+        const slider = row.querySelector(`#sl-${it.id}`);
+        const numInp = row.querySelector(`#ni-${it.id}`);
+
+        function syncFromValue(v) {
+          const min = parseFloat(it.min||0), max = parseFloat(it.max||0);
+          v = it.stepsOnly ? v : clamp(v, min, max);
+          s.value = v;
+          if (slider) slider.value = v;
+          if (numInp) numInp.value = v;
+          s.checked = v > 0;
+          row.classList.toggle('checked', s.checked);
+          const steps = STEPS_MAP[it.stepsSelect];
+          let bestIdx = 0;
+          steps.forEach((st, i) => { if (st.value <= v) bestIdx = i; });
+          stepSel.selectedIndex = bestIdx;
+          updatePanel();
+        }
+
+        stepSel.addEventListener('change', e => {
+          syncFromValue(parseFloat(e.target.value));
+        });
+        if (slider) slider.addEventListener('input', e => {
+          syncFromValue(parseFloat(e.target.value));
+        });
+        if (numInp) numInp.addEventListener('input', e => {
+          const v = parseFloat(e.target.value);
+          if (!isNaN(v)) syncFromValue(v);
+        });
+        if (numInp) numInp.addEventListener('blur', e => {
+          const v = parseFloat(e.target.value);
+          syncFromValue(isNaN(v) ? s.value : v);
+        });
+
+        row.addEventListener('click', (ev) => {
+          if ([stepSel, slider, numInp].some(el => el && (ev.target === el || el.contains(ev.target)))) return;
+          if (s.value > 0) { s.checked = !s.checked; row.classList.toggle('checked', s.checked); updatePanel(); }
+        });
+
+      // ---- Plain range with number input ----
+      } else if (it.range && !selectType) {
+        const slider = row.querySelector(`#sl-${it.id}`);
+        const numInp = row.querySelector(`#ni-${it.id}`);
+        const pctLbl = row.querySelector(`#pct-${it.id}`);
+
+        function syncRange(v) {
+          v = clamp(v, parseFloat(it.min), parseFloat(it.max));
+          s.value = v;
+          slider.value = v;
+          numInp.value = v;
+          if (pctLbl) pctLbl.textContent = '+' + v.toFixed(1) + '%';
+          updatePanel();
+        }
+        slider.addEventListener('input', e => syncRange(parseFloat(e.target.value)));
+        numInp.addEventListener('input', e => { const v = parseFloat(e.target.value); if (!isNaN(v)) syncRange(v); });
+        numInp.addEventListener('blur', e => { const v = parseFloat(e.target.value); syncRange(isNaN(v) ? s.value : v); });
+
+        if (!it.locked) {
+          row.addEventListener('click', (ev) => {
+            if ([slider, numInp].some(el => el && (ev.target === el || el.contains(ev.target)))) return;
+            s.checked = !s.checked; row.classList.toggle('checked', s.checked); updatePanel();
+          });
+        }
+
+      // ---- Select (title / race / clan / spec) ----
+      } else if (selectType) {
+        const sel = row.querySelector(`#sel-${it.id}`);
+        const sr = row.querySelector(`#sr-${it.id}`);
+        const srn = row.querySelector(`#srn-${it.id}`);
+
+        sel.addEventListener('change', e => {
+          const chosen = selectTiers.find(t => t.label === e.target.options[e.target.selectedIndex].text);
+          s.selectedLabel = chosen ? chosen.label : '';
+          if (selectType === 'spec' && chosen && chosen.range) {
+            s.specMin = chosen.min; s.specRangeVal = chosen.max; s.value = chosen.max;
+          } else if (selectType === 'rune') {
+            s.runeKey = chosen && chosen.key ? chosen.key : null;
+            // default to max of chosen rune
+            s.value = chosen ? chosen.steps ? chosen.steps[chosen.steps.length-1] : chosen.value : 0;
+          } else {
+            s.value = parseFloat(e.target.value);
+          }
+          s.checked = s.value > 0;
+          row.classList.toggle('checked', s.checked);
+          renderChecklist(); updatePanel();
+        });
+
+        if (sr) {
+          function syncSpec(v) {
+            v = clamp(v, s.specMin||0, it.luck||15);
+            s.specRangeVal = v; s.value = v;
+            if (sr) sr.value = v;
+            if (srn) srn.value = v;
+            updatePanel();
+          }
+          sr.addEventListener('input', e => syncSpec(parseFloat(e.target.value)));
+          if (srn) {
+            srn.addEventListener('input', e => { const v = parseFloat(e.target.value); if (!isNaN(v)) syncSpec(v); });
+            srn.addEventListener('blur', e => { const v = parseFloat(e.target.value); syncSpec(isNaN(v) ? s.specRangeVal : v); });
+          }
+        }
+
+        // Rune upgrade tier sub-select listener
+        const runeUp = row.querySelector(`#runeup-${it.id}`);
+        if (runeUp) {
+          runeUp.addEventListener('change', e => {
+            s.value = parseFloat(e.target.value);
+            s.checked = s.value > 0;
+            row.classList.toggle('checked', s.checked);
+            updatePanel();
+          });
+        }
+
+        row.addEventListener('click', (ev) => {
+          const targets = [sel, sr, srn, runeUp].filter(Boolean);
+          if (targets.some(el => ev.target === el || el.contains(ev.target))) return;
+          if (s.value > 0) { s.checked = !s.checked; row.classList.toggle('checked', s.checked); updatePanel(); }
+        });
+
+      // ---- Simple toggle ----
+      } else if (!it.locked) {
+        row.addEventListener('click', () => {
+          s.checked = !s.checked;
+          row.classList.toggle('checked', s.checked);
+          updatePanel();
+        });
+      }
+
+      list.appendChild(row);
+    });
+
+    div.appendChild(list);
+    container.appendChild(div);
+  });
+}
+
+function resetAll() {
+  GROUPS.forEach(g => g.items.forEach(it => {
+    if (!it.locked) {
+      state[it.id].checked = false;
+      state[it.id].value = it.luck;
+      delete state[it.id].specRangeVal;
+      delete state[it.id].specMin;
+      delete state[it.id].selectedLabel;
+      delete state[it.id].runeKey;
+    }
+  }));
+  renderChecklist();
+  updatePanel();
+}
+
+renderChecklist();
+updatePanel();
+</script>
+</body>
+</html>
