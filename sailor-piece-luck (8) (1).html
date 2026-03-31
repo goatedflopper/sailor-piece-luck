@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sailor Piece — Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--gold:#f5c842;--gold-dim:#c99e2a;--dark:#0b0d10;--dark2:#111419;--dark3:#181c22;--dark4:#1f242d;--border:rgba(245,200,66,0.18);--border2:rgba(255,255,255,0.07);--text:#e8e4d8;--muted:#7a7d85;--blue:#7eb8ff;--red:#e05050;--orange:#f09a3e;--purple:#b07fff;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;min-height:100vh;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(245,200,66,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(245,200,66,0.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+  .page{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:30px 20px 80px;}
+  .main-tabs{display:flex;gap:8px;justify-content:center;margin-bottom:32px;}
+  .main-tab{padding:10px 36px;border-radius:12px;border:1.5px solid var(--border2);font-size:14px;font-weight:600;letter-spacing:0.05em;cursor:pointer;transition:all 0.18s;color:var(--muted);background:none;font-family:'DM Sans',sans-serif;}
+  .main-tab.active-luck{border-color:var(--gold);color:var(--gold);background:rgba(245,200,66,0.07);}
+  .main-tab.active-dmg{border-color:var(--red);color:var(--red);background:rgba(224,80,80,0.07);}
+  header{text-align:center;margin-bottom:28px;}
+  .logo-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:6px;}
+  .logo-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+  .logo-icon.luck{background:var(--gold);}.logo-icon.dmg{background:var(--red);}
+  h1{font-family:'Bebas Neue',sans-serif;font-size:50px;letter-spacing:0.04em;line-height:1;}
+  h1.luck{color:var(--gold);}h1.dmg{color:var(--red);}
+  .tagline{color:var(--muted);font-size:13px;letter-spacing:0.07em;text-transform:uppercase;}
+  .layout{display:grid;grid-template-columns:1fr 330px;gap:20px;align-items:start;}
+  @media(max-width:660px){.layout{grid-template-columns:1fr;}}
+  .panel{background:var(--dark2);border:1px solid var(--border);border-radius:18px;padding:22px;position:sticky;top:20px;}
+  .panel-title{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+  .brow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border2);font-size:13px;}
+  .brow:last-child{border-bottom:none;}
+  .bl{color:var(--muted);}.bv{font-weight:500;font-variant-numeric:tabular-nums;}
+  .bv.gold{color:var(--gold);}.bv.blue{color:var(--blue);}.bv.orange{color:var(--orange);}.bv.purple{color:var(--purple);}.bv.off{color:var(--muted);opacity:0.35;}
+  .divider{height:1px;background:var(--border);margin:12px 0;}
+  .total-row{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:baseline;}
+  .total-label{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
+  .total-num{font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--red);}
+  .bar-wrap{margin-top:10px;}.bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px;}
+  .bar-track{height:6px;background:var(--dark4);border-radius:99px;overflow:hidden;border:1px solid var(--border2);}
+  .bar-fill{height:100%;border-radius:99px;transition:width 0.4s cubic-bezier(.4,0,.2,1);}
+  .bar-fill.luck{background:linear-gradient(90deg,var(--gold-dim),var(--gold));}.bar-fill.dmg{background:linear-gradient(90deg,#a02020,var(--red));}
+  .reset-btn{width:100%;margin-top:12px;font-size:12px;color:var(--muted);background:none;border:1px solid var(--border2);border-radius:8px;padding:7px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+  .reset-btn:hover{color:var(--text);border-color:var(--border);}
+  .build-tabs{display:flex;gap:6px;margin-bottom:14px;}
+  .build-tab{flex:1;padding:7px 0;border-radius:9px;border:1.5px solid var(--border2);font-size:12px;font-weight:600;letter-spacing:0.05em;text-align:center;cursor:pointer;transition:all 0.18s;color:var(--muted);background:none;font-family:'DM Sans',sans-serif;}
+  .build-tab.active-sword{border-color:var(--blue);color:var(--blue);background:rgba(126,184,255,0.07);}
+  .build-tab.active-melee{border-color:var(--orange);color:var(--orange);background:rgba(240,154,62,0.07);}
+  .base-dmg-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+  .base-dmg-label{font-size:12px;color:var(--muted);white-space:nowrap;}
+  .base-dmg-input{flex:1;background:var(--dark4);color:var(--gold);border:1px solid var(--border2);border-radius:8px;padding:6px 10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;text-align:center;outline:none;}
+  .base-dmg-input:focus{border-color:var(--gold-dim);}
+  .hit-box{background:var(--dark4);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:12px;}
+  .hit-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}.hit-row:last-child{margin-bottom:0;}
+  .hit-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;}
+  .hit-val{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--red);}
+  .hit-val.blue{color:var(--blue);}.hit-val.small{font-size:18px;color:var(--muted);}
+  .group{margin-bottom:14px;}
+  .group-head{display:flex;align-items:center;gap:10px;margin-bottom:7px;padding:0 2px;}
+  .group-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);white-space:nowrap;}
+  .group-line{flex:1;height:1px;background:var(--border2);}
+  .item-list{background:var(--dark2);border:1px solid var(--border2);border-radius:14px;overflow:hidden;}
+  .item{display:flex;align-items:center;gap:12px;padding:12px 15px;border-bottom:1px solid var(--border2);cursor:pointer;transition:background 0.15s;user-select:none;}
+  .item:last-child{border-bottom:none;}.item:hover{background:var(--dark3);}
+  .item.luck-item.checked{background:rgba(245,200,66,0.04);}.item.dmg-item.checked{background:rgba(224,80,80,0.05);}
+  .item.locked{cursor:default;}
+  .cb{width:21px;height:21px;flex-shrink:0;border:1.5px solid rgba(255,255,255,0.18);border-radius:7px;display:flex;align-items:center;justify-content:center;transition:all 0.18s;}
+  .luck-item.checked .cb{background:var(--gold);border-color:var(--gold);}.dmg-item.checked .cb{background:var(--red);border-color:var(--red);}
+  .item.locked .cb{opacity:0.4;}.cb svg{display:none;}.item.checked .cb svg{display:block;}
+  .item-body{flex:1;min-width:0;}.item-name{font-size:14px;font-weight:500;color:var(--text);}
+  .luck-item.checked .item-name{color:var(--gold);}.dmg-item.checked .item-name{color:var(--red);}
+  .item-hint{font-size:12px;color:var(--muted);margin-top:2px;}
+  .item-right{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+  .ipct{font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--muted);transition:color 0.2s;}
+  .luck-item.checked .ipct{color:var(--gold);}.dmg-item.checked .ipct{color:var(--red);}
+  .ipct.mult{color:#3a6fa0;}.luck-item.checked .ipct.mult{color:var(--blue);}
+  .type-badge{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600;letter-spacing:0.04em;}
+  .type-badge.sword{background:rgba(126,184,255,0.12);color:var(--blue);}.type-badge.melee{background:rgba(240,154,62,0.12);color:var(--orange);}.type-badge.trait{background:rgba(176,127,255,0.12);color:var(--purple);}
+  .title-select{width:100%;background:var(--dark4);color:var(--text);border:1px solid var(--border2);border-radius:8px;padding:6px 10px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;outline:none;margin-top:2px;}
+  .title-select:focus{border-color:var(--gold-dim);}
+  .range-combo{display:flex;align-items:center;gap:6px;margin-top:4px;}
+  input[type=range]{width:74px;cursor:pointer;-webkit-appearance:none;appearance:none;height:4px;background:var(--dark4);border-radius:99px;outline:none;border:1px solid var(--border2);}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);cursor:pointer;}
+  .num-input{width:52px;background:var(--dark4);color:var(--gold);border:1px solid var(--border2);border-radius:6px;padding:3px 6px;font-family:'DM Sans',sans-serif;font-size:12px;text-align:center;outline:none;}
+  .num-input:focus{border-color:var(--gold-dim);}.num-unit{font-size:11px;color:var(--muted);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+  footer{text-align:center;margin-top:40px;color:var(--muted);font-size:12px;}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="main-tabs">
+    <button class="main-tab active-luck" id="mtab-luck" onclick="switchTab('luck')">🍀 Luck</button>
+    <button class="main-tab" id="mtab-dmg" onclick="switchTab('dmg')">⚔️ Damage</button>
+  </div>
+
+  <!-- LUCK TAB -->
+  <div id="tab-luck">
+    <header>
+      <div class="logo-row"><div class="logo-icon luck">🍀</div><h1 class="luck">Luck Tracker</h1></div>
+      <p class="tagline">Sailor Piece · Max Luck Calculator</p>
+    </header>
+    <div class="layout">
+      <div id="luck-checklist"></div>
+      <div class="panel">
+        <div class="panel-title">— Breakdown —</div>
+        <div id="luck-brows"></div>
+        <div class="total-row"><span class="total-label">Total</span><span class="total-num" id="luck-total">100%</span></div>
+        <div class="bar-wrap">
+          <div class="bar-labels"><span>Additive progress</span><span id="luck-bar-txt">100%</span></div>
+          <div class="bar-track"><div class="bar-fill luck" id="luck-bar" style="width:0%"></div></div>
+        </div>
+        <button class="reset-btn" onclick="luckResetAll()">Reset all</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAMAGE TAB -->
+  <div id="tab-dmg" style="display:none">
+    <header>
+      <div class="logo-row"><div class="logo-icon dmg">⚔️</div><h1 class="dmg">Damage Tracker</h1></div>
+      <p class="tagline">Sailor Piece · Sword &amp; Melee Damage Calculator</p>
+    </header>
+    <div class="layout">
+      <div id="dmg-checklist"></div>
+      <div class="panel">
+        <div class="panel-title">— Build Type —</div>
+        <div class="build-tabs">
+          <button class="build-tab active-sword" id="btab-sword" onclick="setBuildType('sword')">⚔ Sword</button>
+          <button class="build-tab" id="btab-melee" onclick="setBuildType('melee')">👊 Melee</button>
+        </div>
+        <div class="panel-title">— Base DMG per Hit —</div>
+        <div class="base-dmg-row">
+          <span class="base-dmg-label">Base hit DMG:</span>
+          <input class="base-dmg-input" type="number" id="base-dmg" value="100000" min="1" oninput="dmgUpdatePanel()">
+        </div>
+        <div class="panel-title">— Breakdown —</div>
+        <div id="dmg-brows"></div>
+        <div class="total-row"><span class="total-label">Total Additive</span><span class="total-num" id="dmg-total">+0%</span></div>
+        <div class="bar-wrap">
+          <div class="bar-labels"><span>Additive progress</span><span id="dmg-bar-txt">0%</span></div>
+          <div class="bar-track"><div class="bar-fill dmg" id="dmg-bar" style="width:0%"></div></div>
+        </div>
+        <div class="divider"></div>
+        <div class="panel-title">— Damage Per Hit —</div>
+        <div class="hit-box">
+          <div class="hit-row"><span class="hit-label">Add + Trait mult</span><span class="hit-val small" id="out-gmult">×1.00</span></div>
+          <div class="hit-row"><span class="hit-label" id="type-mult-label">Sword type mult</span><span class="hit-val small" id="out-tmult">×1.00</span></div>
+          <div class="divider" style="margin:8px 0"></div>
+          <div class="hit-row"><span class="hit-label">Final DMG / hit</span><span class="hit-val" id="out-hit">—</span></div>
+          <div class="hit-row"><span class="hit-label">Crit DMG / hit (~×2)</span><span class="hit-val blue" id="out-crit">—</span></div>
+        </div>
+        <button class="reset-btn" onclick="dmgResetAll()">Reset all</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>Values from in-game screenshots &amp; community data</footer>
+</div>
+<script>
+function switchTab(t){
+  document.getElementById('tab-luck').style.display=t==='luck'?'':'none';
+  document.getElementById('tab-dmg').style.display=t==='dmg'?'':'none';
+  document.getElementById('mtab-luck').className='main-tab'+(t==='luck'?' active-luck':'');
+  document.getElementById('mtab-dmg').className='main-tab'+(t==='dmg'?' active-dmg':'');
+}
+function clamp(v,a,b){return Math.min(Math.max(v,a),b);}
+const CB='<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0b0d10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+// ══ LUCK DATA ══
+const L_TITLE=[{label:"None",value:0},{label:"Lucky Novice (+10%)",value:10},{label:"Fortune Seeker (+12.5%)",value:12.5},{label:"Lucky Star (+15%)",value:15},{label:"Blessed One (+20%)",value:20},{label:"The Chosen One (+25%)",value:25},{label:"Blessed Sovereign (+32.5%)",value:32.5},{label:"Destiny Marked (+40%)",value:40},{label:"Celestial Favor (+50%)",value:50}];
+const L_RACE=[{label:"None / No luck race",value:0},{label:"Kitsune (Mythical) — +25% Luck ★",value:25}];
+const L_CLAN=[{label:"None / No luck clan",value:0},{label:"Monarch — +10% Luck ★",value:10},{label:"Alter — +10% Luck ★",value:10},{label:"Eminence — +12.5% Luck ★",value:12.5}];
+const L_SPEC=[{label:"None",value:0},{label:"Fortune Chosen — up to +10%",value:10,range:true,min:0,max:10},{label:"Luck V — +7.5% to +15%",value:15,range:true,min:7.5,max:15}];
+const L_RUNE=[{label:"None",value:0},{label:"Radiant Rune — Max ~28%",value:28,steps:[0,4,8,12,16,20,24,28],key:"radiant"},{label:"Fortune Rune — Max 16%",value:16,steps:[0,4,8,12,16],key:"fortune"}];
+const L_STAT=[{label:"None / F (0%)",value:0},{label:"E (+2%)",value:2},{label:"D (+4%)",value:4},{label:"C (+6%)",value:6},{label:"B (+8%)",value:8},{label:"A (+10%)",value:10},{label:"S (+12%)",value:12}];
+const L_ASC=[{label:"0 — No ascension",value:0},{label:"Level 1 (+5%)",value:5},{label:"Level 2 (+10%)",value:10},{label:"Level 3 (+15%)",value:15},{label:"Level 4 (+20%)",value:20},{label:"Level 5 (+25%)",value:25},{label:"Level 6 (+30%)",value:30},{label:"Level 7 (+35%)",value:35},{label:"Level 8 — Max (+40%)",value:40}];
+const L_BOSS=[{label:"0 upgrades",value:0},{label:"~3%",value:3},{label:"~6%",value:6},{label:"~9%",value:9},{label:"~12%",value:12},{label:"Max (15%)",value:15}];
+const L_SKILL=[{label:"0 upgrades",value:0},{label:"~5%",value:5},{label:"~10%",value:10},{label:"~15%",value:15},{label:"~20%",value:20},{label:"Max (25%)",value:25}];
+const L_SMAP={asc:L_ASC,boss:L_BOSS,tower:L_BOSS,skill:L_SKILL};
+
+const LUCK_GROUPS=[
+  {title:"Base",items:[{id:"base",name:"Base Luck",hint:"Always active",luck:100,type:"add",locked:true}]},
+  {title:"Stat Reroll",items:[{id:"stat",name:"Stat Reroll (luck)",hint:"Stats Reroll NPC at Sailor Island",luck:0,type:"add",statSelect:true}]},
+  {title:"Title",items:[{id:"title",name:"Luck Title",hint:"Select your equipped title tier",luck:0,type:"add",titleSelect:true}]},
+  {title:"Race",items:[{id:"race",name:"Race",hint:"Only Kitsune gives luck",luck:0,type:"add",raceSelect:true}]},
+  {title:"Clan",items:[{id:"clan",name:"Clan",hint:"Monarch / Alter / Eminence give luck",luck:0,type:"add",clanSelect:true}]},
+  {title:"Ascend",items:[{id:"asc",name:"Ascension Level",hint:"Each level +5% — Killua NPC",luck:0,type:"add",stepsSelect:"asc",stepsOnly:true}]},
+  {title:"Rune Dungeons",items:[{id:"rune",name:"Rune",hint:"Select rune type then upgrade tier",luck:0,type:"add",runeSelect:true}]},
+  {title:"Skill Tree",items:[{id:"skill",name:"Skill Tree Luck",hint:"Skill Tree NPC at Slime Island (lvl 7000+)",luck:0,type:"add",stepsSelect:"skill",stepsOnly:true}]},
+  {title:"Spec Passive",items:[{id:"spec",name:"Spec Passive",hint:"Select which luck passive you have",luck:0,type:"add",specSelect:true}]},
+  {title:"Boss Rush",items:[{id:"boss",name:"Boss Rush Luck",hint:"Boss Rush Upgrades NPC, Sailor Island",luck:0,type:"add",stepsSelect:"boss",range:true,min:0,max:15,step:0.5}]},
+  {title:"Infinite Tower",items:[{id:"tower",name:"Infinite Tower Luck",hint:"Tower Upgrades NPC at Tower Island",luck:0,type:"add",stepsSelect:"tower",range:true,min:0,max:15,step:0.5}]},
+  {title:"Gamepass",items:[{id:"gp",name:"2x Luck Pass",hint:"649 Robux — multiplies total luck ×2",luck:2,type:"mult"}]},
+  {title:"Event",items:[{id:"ev",name:"Event x2 Luck",hint:"Dev-hosted weekend events",luck:2,type:"mult"}]},
+];
+const lS={};
+LUCK_GROUPS.forEach(g=>g.items.forEach(it=>{lS[it.id]={checked:!!it.locked,value:it.luck,type:it.type,locked:!!it.locked};}));
+
+function lCalc(){let a=0,m=1;LUCK_GROUPS.forEach(g=>g.items.forEach(it=>{const s=lS[it.id];if(!s.checked)return;if(s.type==='add')a+=s.value;else m*=s.value;}));return{add:a,total:a*m};}
+
+function lUpdatePanel(){
+  const el=document.getElementById('luck-brows');el.innerHTML='';
+  LUCK_GROUPS.forEach(g=>g.items.forEach(it=>{
+    const s=lS[it.id];const r=document.createElement('div');r.className='brow';
+    let vt,vc;
+    if(!s.checked||s.value===0){vt=s.type==='mult'?'×—':'+—';vc='bv off';}
+    else if(s.type==='mult'){vt='×'+s.value.toFixed(1);vc='bv blue';}
+    else{vt='+'+s.value.toFixed(1)+'%';vc='bv gold';}
+    r.innerHTML=`<span class="bl">${it.name}</span><span class="${vc}">${vt}</span>`;el.appendChild(r);
+  }));
+  const{add,total}=lCalc();
+  document.getElementById('luck-total').textContent=total.toFixed(1)+'%';
+  document.getElementById('luck-bar').style.width=Math.min((add/337.5)*100,100).toFixed(1)+'%';
+  document.getElementById('luck-bar-txt').textContent=add.toFixed(1)+'%';
+}
+
+function lTiers(it){return it.titleSelect?L_TITLE:it.raceSelect?L_RACE:it.clanSelect?L_CLAN:it.specSelect?L_SPEC:it.runeSelect?L_RUNE:it.statSelect?L_STAT:null;}
+
+function lBuildStepsHTML(it,s){
+  const steps=L_SMAP[it.stepsSelect];let ci=0;steps.forEach((st,i)=>{if(st.value<=s.value)ci=i;});
+  const opts=steps.map((st,i)=>`<option value="${st.value}"${i===ci?' selected':''}>${st.label}</option>`).join('');
+  if(it.stepsOnly)return`<div class="item-right" style="min-width:180px"><select class="title-select" id="ls-${it.id}" onclick="event.stopPropagation()">${opts}</select></div>`;
+  return`<div class="item-right" style="min-width:200px"><select class="title-select" id="ls-${it.id}" onclick="event.stopPropagation()">${opts}</select>
+    <div class="range-combo" style="margin-top:4px">
+      <input type="range" min="${it.min}" max="${it.max}" step="${it.step}" value="${s.value}" id="lr-${it.id}" onclick="event.stopPropagation()">
+      <input type="number" class="num-input" min="${it.min}" max="${it.max}" step="${it.step}" value="${s.value}" id="ln-${it.id}" onclick="event.stopPropagation()">
+      <span class="num-unit">%</span></div></div>`;
+}
+
+function lRender(){
+  const c=document.getElementById('luck-checklist');c.innerHTML='';
+  LUCK_GROUPS.forEach(group=>{
+    const div=document.createElement('div');div.className='group';
+    div.innerHTML=`<div class="group-head"><span class="group-name">${group.title}</span><span class="group-line"></span></div>`;
+    const list=document.createElement('div');list.className='item-list';
+    group.items.forEach(it=>{
+      const s=lS[it.id];const row=document.createElement('div');
+      row.className='item luck-item'+(s.checked?' checked':'')+(it.locked?' locked':'');
+      const tiers=lTiers(it);const sType=it.titleSelect?'title':it.raceSelect?'race':it.clanSelect?'clan':it.specSelect?'spec':it.runeSelect?'rune':it.statSelect?'stat':null;
+      let rHTML='';
+      if(it.stepsSelect){
+        rHTML=lBuildStepsHTML(it,s);
+      } else if(sType){
+        const opts=tiers.map(t=>`<option value="${t.value}"${t.label===(s.selectedLabel||'')?' selected':''}>${t.label}</option>`).join('');
+        const specRange=(sType==='spec'&&s.value>0)?`<div class="range-combo" style="margin-top:4px">
+          <input type="range" min="${s.specMin||0}" max="${s.value}" step="0.1" value="${s.specRangeVal||s.value}" id="lsr-${it.id}" onclick="event.stopPropagation()">
+          <input type="number" class="num-input" min="${s.specMin||0}" max="${s.value}" step="0.1" value="${s.specRangeVal||s.value}" id="lsrn-${it.id}" onclick="event.stopPropagation()">
+          <span class="num-unit">%</span></div>`:'';
+        let runeBlock='';
+        if(sType==='rune'&&s.runeKey){const ch=L_RUNE.find(t=>t.key===s.runeKey);if(ch&&ch.steps){const so=ch.steps.map(v=>`<option value="${v}"${v===s.value?' selected':''}>${v===ch.steps[ch.steps.length-1]?'Max ('+v+'%)':v===0?'0 upgrades':'~'+v+'%'}</option>`).join('');runeBlock=`<div style="margin-top:4px"><select class="title-select" id="lru-${it.id}" onclick="event.stopPropagation()">${so}</select></div>`;}}
+        rHTML=`<div class="item-right" style="min-width:200px"><select class="title-select" id="lsel-${it.id}" onclick="event.stopPropagation()">${opts}</select>${specRange}${runeBlock}</div>`;
+      } else {
+        const isMult=it.type==='mult';rHTML=`<div class="ipct${isMult?' mult':''}">${isMult?'×'+it.luck.toFixed(1):'+'+it.luck+'%'}</div>`;
+      }
+      row.innerHTML=`<div class="cb">${CB}</div><div class="item-body"><div class="item-name">${it.name}</div><div class="item-hint">${it.hint}</div></div>${rHTML}`;
+
+      if(it.stepsSelect){
+        const ss=row.querySelector(`#ls-${it.id}`),sl=row.querySelector(`#lr-${it.id}`),ni=row.querySelector(`#ln-${it.id}`);
+        function lSyncS(v){v=it.stepsOnly?v:clamp(v,parseFloat(it.min||0),parseFloat(it.max||0));s.value=v;if(sl)sl.value=v;if(ni)ni.value=v;s.checked=v>0;row.classList.toggle('checked',s.checked);const steps=L_SMAP[it.stepsSelect];let bi=0;steps.forEach((st,i)=>{if(st.value<=v)bi=i;});ss.selectedIndex=bi;lUpdatePanel();}
+        ss.addEventListener('change',e=>lSyncS(parseFloat(e.target.value)));
+        if(sl)sl.addEventListener('input',e=>lSyncS(parseFloat(e.target.value)));
+        if(ni){ni.addEventListener('input',e=>{const v=parseFloat(e.target.value);if(!isNaN(v))lSyncS(v);});ni.addEventListener('blur',e=>{const v=parseFloat(e.target.value);lSyncS(isNaN(v)?s.value:v);});}
+        row.addEventListener('click',ev=>{if([ss,sl,ni].filter(Boolean).some(el=>ev.target===el||el.contains(ev.target)))return;if(s.value>0){s.checked=!s.checked;row.classList.toggle('checked',s.checked);lUpdatePanel();}});
+      } else if(sType){
+        const sel=row.querySelector(`#lsel-${it.id}`),sr=row.querySelector(`#lsr-${it.id}`),srn=row.querySelector(`#lsrn-${it.id}`),ru=row.querySelector(`#lru-${it.id}`);
+        sel.addEventListener('change',e=>{
+          const ch=tiers.find(t=>t.label===e.target.options[e.target.selectedIndex].text);s.selectedLabel=ch?ch.label:'';
+          if(sType==='spec'&&ch&&ch.range){s.specMin=ch.min;s.specRangeVal=ch.max;s.value=ch.max;}
+          else if(sType==='rune'){s.runeKey=ch&&ch.key?ch.key:null;s.value=ch?(ch.steps?ch.steps[ch.steps.length-1]:ch.value):0;}
+          else{s.value=parseFloat(e.target.value);}
+          s.checked=s.value>0;row.classList.toggle('checked',s.checked);lRender();lUpdatePanel();
+        });
+        if(sr){function lSyncSR(v){v=clamp(v,s.specMin||0,s.value||15);s.specRangeVal=v;sr.value=v;if(srn)srn.value=v;lUpdatePanel();}sr.addEventListener('input',e=>lSyncSR(parseFloat(e.target.value)));if(srn){srn.addEventListener('input',e=>{const v=parseFloat(e.target.value);if(!isNaN(v))lSyncSR(v);});srn.addEventListener('blur',e=>{const v=parseFloat(e.target.value);lSyncSR(isNaN(v)?(s.specRangeVal||0):v);});}}
+        if(ru)ru.addEventListener('change',e=>{s.value=parseFloat(e.target.value);s.checked=s.value>0;row.classList.toggle('checked',s.checked);lUpdatePanel();});
+        row.addEventListener('click',ev=>{if([sel,sr,srn,ru].filter(Boolean).some(el=>ev.target===el||el.contains(ev.target)))return;if(s.value>0){s.checked=!s.checked;row.classList.toggle('checked',s.checked);lUpdatePanel();}});
+      } else if(!it.locked){
+        row.addEventListener('click',()=>{s.checked=!s.checked;row.classList.toggle('checked',s.checked);lUpdatePanel();});
+      }
+      list.appendChild(row);
+    });
+    div.appendChild(list);c.appendChild(div);
+  });
+}
+function luckResetAll(){LUCK_GROUPS.forEach(g=>g.items.forEach(it=>{if(!it.locked)lS[it.id]={checked:false,value:it.luck,type:it.type};}));lRender();lUpdatePanel();}
+
+// ══ DAMAGE DATA ══
+let buildType='sword';
+function setBuildType(t){buildType=t;document.getElementById('btab-sword').className='build-tab'+(t==='sword'?' active-sword':'');document.getElementById('btab-melee').className='build-tab'+(t==='melee'?' active-melee':'');document.getElementById('type-mult-label').textContent=t==='sword'?'Sword type mult':'Melee type mult';dmgUpdatePanel();}
+
+const D_TITLE=[{label:"None",value:0},{label:"Novice Striker (+10%)",value:10},{label:"Iron Fist (+15%)",value:15},{label:"Rising Fighter (+20%)",value:20},{label:"Warlord (+30%)",value:30},{label:"Conqueror (+40%)",value:40},{label:"Supreme Sovereign (+50%)",value:50},{label:"Havoc (+60%)",value:60},{label:"Transcendent Being (+82.5%)",value:82.5}];
+const D_RACE=[{label:"None / Human (0%)",value:0,sm:0,mm:0},{label:"Warlord — +80% DMG, +22% Melee ★",value:80,sm:0,mm:22},{label:"SwordBlessed — +75% DMG, +20% Sword ★",value:75,sm:20,mm:0},{label:"Galevorn — +75% DMG, +20% Melee ★",value:75,sm:0,mm:20},{label:"Sunborn — +70% DMG, +20% Sword",value:70,sm:20,mm:0},{label:"Servant — +67% DMG, +18% Melee",value:67,sm:0,mm:18},{label:"Kitsune — +50% DMG, +10% Both",value:50,sm:10,mm:10},{label:"Slime — +65% DMG, +17% Sword",value:65,sm:17,mm:0},{label:"Leviathan — +60% DMG, +17% Sword",value:60,sm:17,mm:0},{label:"Oni — +55% DMG, +20% Melee",value:55,sm:0,mm:20},{label:"Shadowborn — +45% DMG",value:45,sm:0,mm:0},{label:"Shinigami — +45% DMG",value:45,sm:0,mm:0},{label:"Player — +40% DMG",value:40,sm:0,mm:0},{label:"Vessel — +35% DMG",value:35,sm:0,mm:0},{label:"Limitless — +30% DMG",value:30,sm:0,mm:0},{label:"Demon — +30% DMG",value:30,sm:0,mm:0},{label:"Vampire — +25% DMG",value:25,sm:0,mm:0},{label:"Orc — +20% DMG",value:20,sm:0,mm:0}];
+const D_CLAN=[{label:"None / No damage clan",value:0},{label:"Alter — +35% DMG ★",value:35},{label:"Pride — +35% DMG",value:35},{label:"Espada — +30% DMG",value:30},{label:"Eminence — +25% DMG",value:25},{label:"Monarch — +20% DMG",value:20},{label:"Celestial — +15% DMG",value:15}];
+const D_TRAIT=[{label:"None / Common (0%)",value:0,mult:1},{label:"Superior I (+5%)",value:5,mult:1},{label:"Superior II (+7.5%)",value:7.5,mult:1},{label:"Superior III (+10%)",value:10,mult:1},{label:"Reaper I (+20%)",value:20,mult:1},{label:"Reaper II (+30%)",value:30,mult:1},{label:"Reaper III (+40%)",value:40,mult:1},{label:"Reaper IV (+50%)",value:50,mult:1},{label:"Reaper V (+60%)",value:60,mult:1},{label:"Malevolent — ×1.80",value:0,mult:1.8},{label:"Singularity — ×2.10",value:0,mult:2.1},{label:"Cataclysm — ×2.30",value:0,mult:2.3},{label:"Celestial T1 — +80%, ×2.20",value:80,mult:2.2},{label:"Celestial T2 — +100%, ×2.20",value:100,mult:2.2},{label:"Celestial T3 — +120%, ×2.20",value:120,mult:2.2},{label:"Celestial T4 Max — +130%, ×2.20",value:130,mult:2.2},{label:"Emperor — ×2.50",value:0,mult:2.5}];
+const D_SPEC=[{label:"None",value:0},{label:"Berserker — up to +29.9%",value:29.9,range:true,min:0,max:29.9},{label:"Executioner — up to +25%",value:25,range:true,min:0,max:25},{label:"Eclipse — up to +20%",value:20,range:true,min:0,max:20},{label:"Other spec passive",value:0,range:true,min:0,max:30}];
+const D_RUNE=[{label:"None",value:0},{label:"Celestial Rune — Max ~120%",value:120,steps:[0,20,40,60,80,100,120],key:"celestial"},{label:"Primordial Rune — Max ~100%",value:100,steps:[0,17,33,50,67,83,100],key:"primordial"},{label:"Havoc Rune — Max ~80%",value:80,steps:[0,13,27,40,53,67,80],key:"havoc"},{label:"Power Rune — Max ~60%",value:60,steps:[0,10,20,30,40,50,60],key:"power"}];
+const D_STAT=[{label:"None / F (0%)",value:0},{label:"E (+5%)",value:5},{label:"D (+10%)",value:10},{label:"C (+15%)",value:15},{label:"B (+20%)",value:20},{label:"A (+25%)",value:25},{label:"S (+30%)",value:30},{label:"SS (+34%)",value:34},{label:"Z (+37%)",value:37}];
+const D_AURA=[{label:"None / Common (0%)",value:0},{label:"Uncommon (+3%)",value:3},{label:"Rare (+5%)",value:5},{label:"Epic (+8%)",value:8},{label:"Legendary (+10%)",value:10},{label:"Mythical (+12%)",value:12},{label:"Divine (+15%)",value:15}];
+const D_COSM=[{label:"None (0%)",value:0},{label:"Any equipped cosmetic (+15%)",value:15}];
+const D_HAKI=[{label:"Not unlocked",value:0},{label:"Lv 1 (~10%)",value:10},{label:"Lv 2 (~20%)",value:20},{label:"Lv 3 (~30%)",value:30},{label:"Lv 4 (~40%)",value:40},{label:"Lv 5 (~50%)",value:50},{label:"Lv 6 (~60%)",value:60},{label:"Lv 7 (~70%)",value:70},{label:"Max (~75.5%)",value:75.5}];
+const D_CONQ=[{label:"Not unlocked",value:0},{label:"Lv 1 (~5%)",value:5},{label:"Lv 2 (~10%)",value:10},{label:"Lv 3 (~17%)",value:17},{label:"Lv 4 (~25%)",value:25},{label:"Max (~34%)",value:34}];
+const D_SKILL=[{label:"0 upgrades",value:0},{label:"~5%",value:5},{label:"~10%",value:10},{label:"~15%",value:15},{label:"~20%",value:20},{label:"Max (~25%)",value:25}];
+const D_BLESS=[{label:"Not blessed",value:0},{label:"B5 (~+3%)",value:3},{label:"B10 (~+6%)",value:6},{label:"B15 (~+9%)",value:9},{label:"B20 (~+12%)",value:12},{label:"B25 (~+15%)",value:15},{label:"B30 (~+18%)",value:18},{label:"Max (~+25%)",value:25}];
+const D_MAST=[{label:"No mastery (0%)",value:0},{label:"25% progress (+25%)",value:25},{label:"50% progress (+50%)",value:50},{label:"75% progress (+75%)",value:75},{label:"Max mastery (+100%)",value:100}];
+const D_ACC=[{label:"No accessory / E0",value:0},{label:"E1 (~15%)",value:15},{label:"E2 (~30%)",value:30},{label:"E3 (~45%)",value:45},{label:"E4 (~60%)",value:60},{label:"E5 (~75%)",value:75},{label:"E6 (~85%)",value:85},{label:"E7 (~95%)",value:95},{label:"E8 (~105%)",value:105},{label:"E9 (~110%)",value:110},{label:"E10 Max (~115%)",value:115}];
+const D_ART=[{label:"No set",value:0},{label:"2-piece partial (~25%)",value:25},{label:"4-piece Abyss (~50%)",value:50},{label:"Full Celestial Rupture Max (~91.9%)",value:91.9}];
+const D_SMAP={haki:D_HAKI,conq:D_CONQ,skill:D_SKILL,boss:D_SKILL,tower:D_SKILL,blessing:D_BLESS,mastery:D_MAST,accessory:D_ACC,artifact:D_ART};
+
+const DMG_GROUPS=[
+  {title:"Stat Reroll",items:[{id:"stat",name:"Stat Reroll (DMG)",hint:"Stats Reroll NPC — select your damage stat tier",dmg:0,type:"add",statSelect:true}]},
+  {title:"Trait",items:[{id:"trait",name:"Trait",hint:"High-tier traits also apply a global DMG multiplier",dmg:0,type:"add",traitSelect:true}]},
+  {title:"Race",items:[{id:"race",name:"Race + Type Multiplier",hint:"Gives global DMG% AND a Sword or Melee type multiplier",dmg:0,type:"add",raceSelect:true}]},
+  {title:"Clan",items:[{id:"clan",name:"Clan",hint:"Alter / Pride / Espada give the most DMG",dmg:0,type:"add",clanSelect:true}]},
+  {title:"Accessory",items:[{id:"accessory",name:"Accessory Enchant (E0–E10)",hint:"Best-in-slot accessory",dmg:0,type:"add",stepsSelect:"accessory",stepsOnly:true}]},
+  {title:"Artifact",items:[{id:"artifact",name:"Artifact Set Bonus",hint:"Celestial Rupture or Abyss set",dmg:0,type:"add",stepsSelect:"artifact",stepsOnly:true}]},
+  {title:"Rune",items:[{id:"rune",name:"Rune",hint:"Select your damage rune then pick upgrade level",dmg:0,type:"add",runeSelect:true}]},
+  {title:"Title",items:[{id:"title",name:"Damage Title",hint:"Select your equipped title",dmg:0,type:"add",titleSelect:true}]},
+  {title:"Haki",items:[{id:"haki",name:"Armament Haki",hint:"Unlocked on Snow Island",dmg:0,type:"add",stepsSelect:"haki",stepsOnly:true}]},
+  {title:"Conq. Haki",items:[{id:"conq",name:"Conqueror's Haki",hint:"Global damage buff",dmg:0,type:"add",stepsSelect:"conq",stepsOnly:true}]},
+  {title:"Skill Tree",items:[{id:"skill",name:"Skill Tree (DMG nodes)",hint:"Skill Tree NPC at Slime Island (lvl 7000+)",dmg:0,type:"add",stepsSelect:"skill",stepsOnly:true}]},
+  {title:"Aura",items:[{id:"aura",name:"Aura",hint:"From Aura Crates — select your rarity",dmg:0,type:"add",auraSelect:true}]},
+  {title:"Cosmetic",items:[{id:"cosmetic",name:"Cosmetic",hint:"Any equipped cosmetic gives +15% DMG",dmg:0,type:"add",cosmeticSelect:true}]},
+  {title:"Spec Passive",items:[{id:"spec",name:"Spec Passive",hint:"Select your damage spec passive",dmg:0,type:"add",specSelect:true}]},
+  {title:"Blessing",items:[{id:"blessing",name:"Weapon / Spec Blessing",hint:"Bless NPC at Shibuya",dmg:0,type:"add",stepsSelect:"blessing",stepsOnly:true}]},
+  {title:"Mastery",items:[{id:"mastery",name:"Sword / Spec Mastery",hint:"Max mastery = ×2 damage",dmg:0,type:"add",stepsSelect:"mastery",stepsOnly:true}]},
+  {title:"Boss Rush",items:[{id:"boss",name:"Boss Rush DMG Upgrades",hint:"Boss Rush Upgrades NPC, Sailor Island",dmg:0,type:"add",stepsSelect:"boss",stepsOnly:true}]},
+  {title:"Infinite Tower",items:[{id:"tower",name:"Infinite Tower DMG Upgrades",hint:"Tower Upgrades NPC at Tower Island",dmg:0,type:"add",stepsSelect:"tower",stepsOnly:true}]},
+];
+const dS={};
+DMG_GROUPS.forEach(g=>g.items.forEach(it=>{dS[it.id]={checked:false,value:it.dmg,type:it.type};}));
+
+function dCalc(){let a=0,tm=1,ty=1;DMG_GROUPS.forEach(g=>g.items.forEach(it=>{const s=dS[it.id];if(!s.checked)return;if(it.id==='trait'){a+=s.value||0;tm=s.traitMult||1;}else if(it.id==='race'){a+=s.value||0;const tv=buildType==='sword'?(s.sm||0):(s.mm||0);if(tv>0)ty*=(1+tv/100);}else if(it.id==='spec'){a+=s.specRangeVal!==undefined?s.specRangeVal:(s.value||0);}else{a+=s.value||0;}}));return{add:a,traitMult:tm,typeMult:ty};}
+function fmt(n){if(n>=1e9)return(n/1e9).toFixed(2)+'B';if(n>=1e6)return(n/1e6).toFixed(2)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return Math.round(n).toLocaleString();}
+
+function dmgUpdatePanel(){
+  const el=document.getElementById('dmg-brows');el.innerHTML='';
+  DMG_GROUPS.forEach(g=>g.items.forEach(it=>{
+    const s=dS[it.id];const r=document.createElement('div');r.className='brow';
+    const av=it.id==='spec'?(s.specRangeVal!==undefined?s.specRangeVal:s.value):(s.value||0);
+    r.innerHTML=`<span class="bl">${it.name}</span><span class="${!s.checked||av===0?'bv off':'bv gold'}">${!s.checked||av===0?'+—':'+'+av.toFixed(1)+'%'}</span>`;el.appendChild(r);
+    if(it.id==='race'&&s.checked){const sv=s.sm||0,mv=s.mm||0;if(sv>0||mv>0){const tv=buildType==='sword'?sv:mv;const lb=buildType==='sword'?'↳ Sword Multi':'↳ Melee Multi';const tr2=document.createElement('div');tr2.className='brow';tr2.innerHTML=`<span class="bl" style="font-size:12px;padding-left:8px">${lb}</span><span class="${tv>0?(buildType==='sword'?'bv blue':'bv orange'):'bv off'}">${tv>0?'×'+(1+tv/100).toFixed(2):'×—'}</span>`;el.appendChild(tr2);}}
+    if(it.id==='trait'&&s.checked&&(s.traitMult||1)>1){const tr2=document.createElement('div');tr2.className='brow';tr2.innerHTML=`<span class="bl" style="font-size:12px;padding-left:8px">↳ Trait DMG Mult</span><span class="bv purple">×${(s.traitMult).toFixed(2)}</span>`;el.appendChild(tr2);}
+  }));
+  const{add,traitMult,typeMult}=dCalc();const base=parseFloat(document.getElementById('base-dmg').value)||0;
+  document.getElementById('dmg-total').textContent='+'+add.toFixed(1)+'%';
+  document.getElementById('dmg-bar').style.width=Math.min((add/1100)*100,100).toFixed(1)+'%';
+  document.getElementById('dmg-bar-txt').textContent=add.toFixed(1)+'%';
+  const am=1+add/100,fd=base*am*traitMult*typeMult;
+  document.getElementById('out-gmult').textContent='×'+(am*traitMult).toFixed(2);
+  document.getElementById('out-tmult').textContent='×'+typeMult.toFixed(2);
+  document.getElementById('out-hit').textContent=base>0?fmt(fd):'—';
+  document.getElementById('out-crit').textContent=base>0?fmt(fd*2):'—';
+}
+
+function dTiers(it){return it.titleSelect?D_TITLE:it.raceSelect?D_RACE:it.clanSelect?D_CLAN:it.specSelect?D_SPEC:it.runeSelect?D_RUNE:it.statSelect?D_STAT:it.traitSelect?D_TRAIT:it.auraSelect?D_AURA:it.cosmeticSelect?D_COSM:null;}
+
+function dmgRender(){
+  const c=document.getElementById('dmg-checklist');c.innerHTML='';
+  DMG_GROUPS.forEach(group=>{
+    const div=document.createElement('div');div.className='group';
+    div.innerHTML=`<div class="group-head"><span class="group-name">${group.title}</span><span class="group-line"></span></div>`;
+    const list=document.createElement('div');list.className='item-list';
+    group.items.forEach(it=>{
+      const s=dS[it.id];const row=document.createElement('div');row.className='item dmg-item'+(s.checked?' checked':'');
+      const tiers=dTiers(it);const sType=it.titleSelect?'title':it.raceSelect?'race':it.clanSelect?'clan':it.specSelect?'spec':it.runeSelect?'rune':it.statSelect?'stat':it.traitSelect?'trait':it.auraSelect?'aura':it.cosmeticSelect?'cosmetic':null;
+      let rHTML='';
+      if(it.stepsSelect){
+        const steps=D_SMAP[it.stepsSelect];let ci=0;steps.forEach((st,i)=>{if(st.value<=s.value)ci=i;});
+        const opts=steps.map((st,i)=>`<option value="${st.value}"${i===ci?' selected':''}>${st.label}</option>`).join('');
+        rHTML=`<div class="item-right" style="min-width:220px"><select class="title-select" id="ds-${it.id}" onclick="event.stopPropagation()">${opts}</select></div>`;
+      } else if(sType){
+        const opts=tiers.map(t=>`<option value="${t.value}"${t.label===(s.selectedLabel||'')?' selected':''}>${t.label}</option>`).join('');
+        const specRange=(sType==='spec'&&s.value>0)?`<div class="range-combo" style="margin-top:4px"><input type="range" min="0" max="${s.value}" step="0.1" value="${s.specRangeVal||s.value}" id="dsr-${it.id}" onclick="event.stopPropagation()"><input type="number" class="num-input" min="0" max="${s.value}" step="0.1" value="${s.specRangeVal||s.value}" id="dsrn-${it.id}" onclick="event.stopPropagation()"><span class="num-unit">%</span></div>`:'';
+        let badge='';
+        if(sType==='race'){const ch=D_RACE.find(t=>t.label===(s.selectedLabel||''));if(ch){if((ch.sm||0)>0)badge=`<span class="type-badge sword">+${ch.sm}% Sword Multi</span>`;else if((ch.mm||0)>0)badge=`<span class="type-badge melee">+${ch.mm}% Melee Multi</span>`;}}
+        if(sType==='trait'){const ch=D_TRAIT.find(t=>t.label===(s.selectedLabel||''));if(ch&&(ch.mult||1)>1)badge=`<span class="type-badge trait">×${ch.mult.toFixed(2)} Mult</span>`;}
+        let runeBlock='';
+        if(sType==='rune'&&s.runeKey){const ch=D_RUNE.find(t=>t.key===s.runeKey);if(ch&&ch.steps){const so=ch.steps.map(v=>`<option value="${v}"${v===s.value?' selected':''}>${v===ch.steps[ch.steps.length-1]?'Max ('+v+'%)':v===0?'0 upgrades':'~'+v+'%'}</option>`).join('');runeBlock=`<div style="margin-top:4px"><select class="title-select" id="dru-${it.id}" onclick="event.stopPropagation()">${so}</select></div>`;}}
+        rHTML=`<div class="item-right" style="min-width:225px"><select class="title-select" id="dsel-${it.id}" onclick="event.stopPropagation()">${opts}</select>${badge}${specRange}${runeBlock}</div>`;
+      } else {rHTML=`<div class="ipct">+${it.dmg}%</div>`;}
+
+      row.innerHTML=`<div class="cb">${CB}</div><div class="item-body"><div class="item-name">${it.name}</div><div class="item-hint">${it.hint}</div></div>${rHTML}`;
+
+      if(it.stepsSelect){
+        const ss=row.querySelector(`#ds-${it.id}`);
+        ss.addEventListener('change',e=>{s.value=parseFloat(e.target.value);s.checked=s.value>0;row.classList.toggle('checked',s.checked);dmgUpdatePanel();});
+        row.addEventListener('click',ev=>{if(ev.target===ss||ss.contains(ev.target))return;if(s.value>0){s.checked=!s.checked;row.classList.toggle('checked',s.checked);dmgUpdatePanel();}});
+      } else if(sType){
+        const sel=row.querySelector(`#dsel-${it.id}`),sr=row.querySelector(`#dsr-${it.id}`),srn=row.querySelector(`#dsrn-${it.id}`),ru=row.querySelector(`#dru-${it.id}`);
+        sel.addEventListener('change',e=>{
+          const ch=tiers.find(t=>t.label===e.target.options[e.target.selectedIndex].text);s.selectedLabel=ch?ch.label:'';
+          if(sType==='spec'&&ch&&ch.range){s.value=ch.max;s.specRangeVal=ch.max;}
+          else if(sType==='rune'){s.runeKey=ch&&ch.key?ch.key:null;s.value=ch?(ch.steps?ch.steps[ch.steps.length-1]:ch.value):0;}
+          else if(sType==='trait'){s.value=ch?ch.value:0;s.traitMult=ch?(ch.mult||1):1;}
+          else if(sType==='race'){s.value=ch?ch.value:0;s.sm=ch?(ch.sm||0):0;s.mm=ch?(ch.mm||0):0;}
+          else{s.value=parseFloat(e.target.value);}
+          s.checked=s.value>0||(sType==='trait'&&(s.traitMult||1)>1)||(sType==='race'&&((s.sm||0)>0||(s.mm||0)>0));
+          row.classList.toggle('checked',s.checked);dmgRender();dmgUpdatePanel();
+        });
+        if(sr){function dSS(v){v=clamp(v,0,s.value||30);s.specRangeVal=v;sr.value=v;if(srn)srn.value=v;dmgUpdatePanel();}sr.addEventListener('input',e=>dSS(parseFloat(e.target.value)));if(srn){srn.addEventListener('input',e=>{const v=parseFloat(e.target.value);if(!isNaN(v))dSS(v);});srn.addEventListener('blur',e=>{const v=parseFloat(e.target.value);dSS(isNaN(v)?(s.specRangeVal||0):v);});}}
+        if(ru)ru.addEventListener('change',e=>{s.value=parseFloat(e.target.value);s.checked=s.value>0;row.classList.toggle('checked',s.checked);dmgUpdatePanel();});
+        row.addEventListener('click',ev=>{if([sel,sr,srn,ru].filter(Boolean).some(el=>ev.target===el||el.contains(ev.target))&&ev.target!==row)return;if(s.checked||s.value>0){s.checked=!s.checked;row.classList.toggle('checked',s.checked);dmgUpdatePanel();}});
+      } else {row.addEventListener('click',()=>{s.checked=!s.checked;row.classList.toggle('checked',s.checked);dmgUpdatePanel();});}
+      list.appendChild(row);
+    });
+    div.appendChild(list);c.appendChild(div);
+  });
+}
+function dmgResetAll(){DMG_GROUPS.forEach(g=>g.items.forEach(it=>{dS[it.id]={checked:false,value:it.dmg,type:it.type};}));dmgRender();dmgUpdatePanel();}
+
+lRender();lUpdatePanel();dmgRender();dmgUpdatePanel();
+</script>
+</body>
+</html>
