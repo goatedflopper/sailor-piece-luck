@@ -143,15 +143,16 @@ const CB='<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline 
 // ══ LUCK DATA ══
 const L_TITLE=[{label:"None",value:0},{label:"Lucky Novice (+10%)",value:10},{label:"Fortune Seeker (+12.5%)",value:12.5},{label:"Lucky Star (+15%)",value:15},{label:"Blessed One (+20%)",value:20},{label:"The Chosen One (+25%)",value:25},{label:"Blessed Sovereign (+32.5%)",value:32.5},{label:"Destiny Marked (+40%)",value:40},{label:"Celestial Favor (+50%)",value:50}];
 const L_RACE=[{label:"None / No luck race",value:0},{label:"Kitsune (Mythical) — +25% Luck ★",value:25}];
-const L_CLAN=[{label:"None / No luck clan",value:0},{label:"Monarch — +10% Luck ★",value:10},{label:"Alter — +10% Luck ★",value:10},{label:"Eminence — +12.5% Luck ★",value:12.5}];
+const L_CLAN=[{label:"None / No luck clan",value:0},{label:"Upper — +12.5% Luck ★",value:12.5},{label:"Monarch — +10% Luck ★",value:10},{label:"Alter — +10% Luck ★",value:10},{label:"Eminence — +12.5% Luck ★",value:12.5}];
 const L_SPEC=[{label:"None",value:0},{label:"Fortune Chosen ✦✦ (5–10%)",value:10,range:true,min:5,max:10},{label:"Luck V ✦ (7.5–15%)",value:15,range:true,min:7.5,max:15},{label:"Eclipse ✦ (5–10%)",value:10,range:true,min:5,max:10},{label:"Luck IV (5–10%)",value:10,range:true,min:5,max:10},{label:"Luck III (3–7%)",value:7,range:true,min:3,max:7},{label:"Luck II (2–5%)",value:5,range:true,min:2,max:5},{label:"Luck I (1–2.5%)",value:2.5,range:true,min:1,max:2.5}];
 const L_RUNE=[{label:"None",value:0},{label:"Radiant Rune — Max ~28%",value:28,steps:[0,4,8,12,16,20,24,28],key:"radiant"},{label:"Fortune Rune — Max 16%",value:16,steps:[0,4,8,12,16],key:"fortune"}];
 const L_STAT=[{label:"None / F (0%)",value:0},{label:"E (+2%)",value:2},{label:"D (+4%)",value:4},{label:"C (+6%)",value:6},{label:"B (+8%)",value:8},{label:"A (+10%)",value:10},{label:"S (+12%)",value:12}];
-const L_ASC=[{label:"0 — No ascension",value:0},{label:"Level 1 (+5%)",value:5},{label:"Level 2 (+10%)",value:10},{label:"Level 3 (+15%)",value:15},{label:"Level 4 (+20%)",value:20},{label:"Level 5 (+25%)",value:25},{label:"Level 6 (+30%)",value:30},{label:"Level 7 (+35%)",value:35},{label:"Level 8 — Max (+40%)",value:40}];
+const L_ASC=[{label:"0 — No ascension",value:0},{label:"Level 1 (+5%)",value:5},{label:"Level 2 (+10%)",value:10},{label:"Level 3 (+15%)",value:15},{label:"Level 4 (+20%)",value:20},{label:"Level 5 (+25%)",value:25},{label:"Level 6 (+30%)",value:30},{label:"Level 7 (+35%)",value:35},{label:"Level 8 (+40%)",value:40},{label:"Level 9 (+45%)",value:45},{label:"Level 10 — Max (+55%)",value:55}];
 const L_BOSS=[{label:"0 upgrades",value:0},{label:"~3%",value:3},{label:"~6%",value:6},{label:"~9%",value:9},{label:"~12%",value:12},{label:"Max (15%)",value:15}];
 const L_SKILL=[{label:"0 upgrades",value:0},{label:"~5%",value:5},{label:"~10%",value:10},{label:"~15%",value:15},{label:"~20%",value:20},{label:"Max (25%)",value:25}];
 const L_SMAP={asc:L_ASC,boss:L_BOSS,tower:L_BOSS,skill:L_SKILL};
 
+const L_POWER=[{label:"None",value:0},{label:"Colossus ✦✦ (7.5–15%)",value:15,range:true,min:7.5,max:15},{label:"Apex ✦ (5–12.5%)",value:12.5,range:true,min:5,max:12.5},{label:"Eclipse ✦ (5–10%)",value:10,range:true,min:5,max:10},{label:"Luck IV (5–10%)",value:10,range:true,min:5,max:10},{label:"Luck III (3–7%)",value:7,range:true,min:3,max:7},{label:"Luck II (2–5%)",value:5,range:true,min:2,max:5},{label:"Luck I (1–2.5%)",value:2.5,range:true,min:1,max:2.5}];
 const LUCK_GROUPS=[
   {title:"Base",items:[{id:"base",name:"Base Luck",hint:"Always active",luck:100,type:"add",locked:true}]},
   {title:"Stat Reroll",items:[{id:"stat",name:"Stat Reroll (luck)",hint:"Stats Reroll NPC at Sailor Island",luck:0,type:"add",statSelect:true}]},
@@ -164,22 +165,24 @@ const LUCK_GROUPS=[
   {title:"Spec Passive",items:[{id:"spec",name:"Spec Passive",hint:"Select which luck passive you have",luck:0,type:"add",specSelect:true}]},
   {title:"Boss Rush",items:[{id:"boss",name:"Boss Rush Luck",hint:"Boss Rush Upgrades NPC, Sailor Island",luck:0,type:"add",stepsSelect:"boss",range:true,min:0,max:15,step:0.5}]},
   {title:"Infinite Tower",items:[{id:"tower",name:"Infinite Tower Luck",hint:"Tower Upgrades NPC at Tower Island",luck:0,type:"add",stepsSelect:"tower",range:true,min:0,max:15,step:0.5}]},
+  {title:"Power",items:[{id:"lpower",name:"Power",hint:"Lawless Island",luck:0,type:"add",powerSelect:true}]},
   {title:"Gamepass",items:[{id:"gp",name:"2x Luck Pass",hint:"649 Robux — multiplies total luck ×2",luck:2,type:"mult"}]},
   {title:"Event",items:[{id:"ev",name:"Event x2 Luck",hint:"Dev-hosted weekend events",luck:2,type:"mult"}]},
 ];
 const lS={};
 LUCK_GROUPS.forEach(g=>g.items.forEach(it=>{lS[it.id]={checked:!!it.locked,value:it.luck,type:it.type,locked:!!it.locked};}));
 
-function lCalc(){let a=0,m=1;LUCK_GROUPS.forEach(g=>g.items.forEach(it=>{const s=lS[it.id];if(!s.checked)return;if(s.type==='add')a+=s.value;else m*=s.value;}));return{add:a,total:a*m};}
+function lCalc(){let a=0,m=1;LUCK_GROUPS.forEach(g=>g.items.forEach(it=>{const s=lS[it.id];if(!s.checked)return;if(s.type==='add')a+=(it.id==='lpower'&&s.specRangeVal!==undefined?s.specRangeVal:s.value);else m*=s.value;}));return{add:a,total:a*m};}
 
 function lUpdatePanel(){
   const el=document.getElementById('luck-brows');el.innerHTML='';
   LUCK_GROUPS.forEach(g=>g.items.forEach(it=>{
     const s=lS[it.id];const r=document.createElement('div');r.className='brow';
+    const lav=it.id==='lpower'&&s.specRangeVal!==undefined?s.specRangeVal:s.value;
     let vt,vc;
-    if(!s.checked||s.value===0){vt=s.type==='mult'?'×—':'+—';vc='bv off';}
-    else if(s.type==='mult'){vt='×'+s.value.toFixed(1);vc='bv blue';}
-    else{vt='+'+s.value.toFixed(1)+'%';vc='bv gold';}
+    if(!s.checked||lav===0){vt=s.type==='mult'?'×—':'+—';vc='bv off';}
+    else if(s.type==='mult'){vt='×'+lav.toFixed(1);vc='bv blue';}
+    else{vt='+'+lav.toFixed(1)+'%';vc='bv gold';}
     r.innerHTML=`<span class="bl">${it.name}</span><span class="${vc}">${vt}</span>`;el.appendChild(r);
   }));
   const{add,total}=lCalc();
@@ -188,7 +191,7 @@ function lUpdatePanel(){
   document.getElementById('luck-bar-txt').textContent=add.toFixed(1)+'%';
 }
 
-function lTiers(it){return it.titleSelect?L_TITLE:it.raceSelect?L_RACE:it.clanSelect?L_CLAN:it.specSelect?L_SPEC:it.runeSelect?L_RUNE:it.statSelect?L_STAT:null;}
+function lTiers(it){return it.titleSelect?L_TITLE:it.raceSelect?L_RACE:it.clanSelect?L_CLAN:it.specSelect?L_SPEC:it.runeSelect?L_RUNE:it.statSelect?L_STAT:it.powerSelect?L_POWER:null;}
 
 function lBuildStepsHTML(it,s){
   const steps=L_SMAP[it.stepsSelect];let ci=0;steps.forEach((st,i)=>{if(st.value<=s.value)ci=i;});
@@ -210,13 +213,13 @@ function lRender(){
     group.items.forEach(it=>{
       const s=lS[it.id];const row=document.createElement('div');
       row.className='item luck-item'+(s.checked?' checked':'')+(it.locked?' locked':'');
-      const tiers=lTiers(it);const sType=it.titleSelect?'title':it.raceSelect?'race':it.clanSelect?'clan':it.specSelect?'spec':it.runeSelect?'rune':it.statSelect?'stat':null;
+      const tiers=lTiers(it);const sType=it.titleSelect?'title':it.raceSelect?'race':it.clanSelect?'clan':it.specSelect?'spec':it.runeSelect?'rune':it.statSelect?'stat':it.powerSelect?'power':null;
       let rHTML='';
       if(it.stepsSelect){
         rHTML=lBuildStepsHTML(it,s);
       } else if(sType){
         const opts=tiers.map(t=>`<option value="${t.value}"${t.label===(s.selectedLabel||'')?' selected':''}>${t.label}</option>`).join('');
-        const specRange=(sType==='spec'&&s.value>0)?`<div class="range-combo" style="margin-top:4px">
+        const specRange=((sType==='spec'||sType==='power')&&s.value>0)?`<div class="range-combo" style="margin-top:4px">
           <input type="range" min="${s.specMin||0}" max="${s.value}" step="0.1" value="${s.specRangeVal||s.value}" id="lsr-${it.id}" onclick="event.stopPropagation()">
           <input type="number" class="num-input" min="${s.specMin||0}" max="${s.value}" step="0.1" value="${s.specRangeVal||s.value}" id="lsrn-${it.id}" onclick="event.stopPropagation()">
           <span class="num-unit">%</span></div>`:'';
@@ -239,7 +242,7 @@ function lRender(){
         const sel=row.querySelector(`#lsel-${it.id}`),sr=row.querySelector(`#lsr-${it.id}`),srn=row.querySelector(`#lsrn-${it.id}`),ru=row.querySelector(`#lru-${it.id}`);
         sel.addEventListener('change',e=>{
           const ch=tiers.find(t=>t.label===e.target.options[e.target.selectedIndex].text);s.selectedLabel=ch?ch.label:'';
-          if(sType==='spec'&&ch&&ch.range){s.specMin=ch.min;s.specRangeVal=ch.max;s.value=ch.max;}
+          if((sType==='spec'||sType==='power')&&ch&&ch.range){s.specMin=ch.min;s.specRangeVal=ch.max;s.value=ch.max;}
           else if(sType==='rune'){s.runeKey=ch&&ch.key?ch.key:null;s.value=ch?(ch.steps?ch.steps[ch.steps.length-1]:ch.value):0;}
           else{s.value=parseFloat(e.target.value);}
           s.checked=s.value>0;row.classList.toggle('checked',s.checked);lRender();lUpdatePanel();
@@ -261,11 +264,11 @@ function luckResetAll(){LUCK_GROUPS.forEach(g=>g.items.forEach(it=>{if(!it.locke
 let buildType='sword';
 function setBuildType(t){buildType=t;document.getElementById('btab-sword').className='build-tab'+(t==='sword'?' active-sword':'');document.getElementById('btab-melee').className='build-tab'+(t==='melee'?' active-melee':'');dmgUpdatePanel();}
 
-const D_TITLE=[{label:"None",value:0},{label:"Blade Master (+15%)",value:15},{label:"Living Weapon (+16.5%)",value:16.5},{label:"Honored One (+17.5%)",value:17.5},{label:"Curse King (+20%)",value:20},{label:"Shadow Monarch (+25%)",value:25},{label:"King of Beginning (+27.5%)",value:27.5},{label:"Vampire King (+32.5%)",value:32.5},{label:"Manipulator (+35%)",value:35},{label:"Soul Reaper (+37.5%)",value:37.5},{label:"Eminence in Shadow (+40%)",value:40},{label:"Strongest Sorcerer (+45%)",value:45},{label:"Disgraced One (+50%)",value:50},{label:"Demon Lord (+55%)",value:55},{label:"Golden King (+57.5%)",value:57.5},{label:"Demon King (+60%)",value:60},{label:"King of Shadows (+62.5%)",value:62.5},{label:"The One (+65%)",value:65},{label:"Blade Sovereign (+65%)",value:65},{label:"Astral Empress (+70%)",value:70},{label:"Transcendent Being (+72.5%)",value:72.5},{label:"Corrupt Tyrant (+75%)",value:75},{label:"Void Empress (+77.5%)",value:77.5},{label:"Battlefield Warlord (+80%)",value:80},{label:"Eminence Incarnate (+82.5%)",value:82.5},{label:"🎄 Santa's Helper (+15%)",value:15},{label:"💘 Cupid's Chosen (+25%)",value:25},{label:"⭐ Star Maiden (+50%)",value:50}];
+const D_TITLE=[{label:"None",value:0},{label:"Blade Master (+15%)",value:15},{label:"Living Weapon (+16.5%)",value:16.5},{label:"Honored One (+17.5%)",value:17.5},{label:"Curse King (+20%)",value:20},{label:"Shadow Monarch (+25%)",value:25},{label:"King of Beginning (+27.5%)",value:27.5},{label:"Vampire King (+32.5%)",value:32.5},{label:"Manipulator (+35%)",value:35},{label:"Soul Reaper (+37.5%)",value:37.5},{label:"Eminence in Shadow (+40%)",value:40},{label:"Strongest Sorcerer (+45%)",value:45},{label:"Disgraced One (+50%)",value:50},{label:"Demon Lord (+55%)",value:55},{label:"Golden King (+57.5%)",value:57.5},{label:"Demon King (+60%)",value:60},{label:"King of Shadows (+62.5%)",value:62.5},{label:"The One (+65%)",value:65},{label:"Blade Sovereign (+65%)",value:65},{label:"Astral Empress (+70%)",value:70},{label:"Transcendent Being (+72.5%)",value:72.5},{label:"Corrupt Tyrant (+75%)",value:75},{label:"Void Empress (+77.5%)",value:77.5},{label:"Battlefield Warlord (+80%)",value:80},{label:"Eminence Incarnate (+82.5%)",value:82.5},{label:"🎄 Santa's Helper (+15%)",value:15},{label:"💘 Cupid's Chosen (+25%)",value:25},{label:"⭐ Star Maiden (+50%)",value:50},{label:"Six Eyed Demon (+85%)",value:85}];
 const D_RACE=[{label:"None / Human (0%)",value:0,sm:0,mm:0},{label:"Warlord — +80% DMG, +22% Melee ★",value:80,sm:0,mm:22},{label:"SwordBlessed — +75% DMG, +20% Sword ★",value:75,sm:20,mm:0},{label:"Galevorn — +75% DMG, +20% Melee ★",value:75,sm:0,mm:20},{label:"Sunborn — +70% DMG, +20% Sword",value:70,sm:20,mm:0},{label:"Servant — +67% DMG, +18% Melee",value:67,sm:0,mm:18},{label:"Kitsune — +50% DMG, +10% Both",value:50,sm:10,mm:10},{label:"Slime — +65% DMG, +17% Sword",value:65,sm:17,mm:0},{label:"Leviathan — +60% DMG, +17% Sword",value:60,sm:17,mm:0},{label:"Oni — +55% DMG, +20% Melee",value:55,sm:0,mm:20},{label:"Shadowborn — +45% DMG",value:45,sm:0,mm:0},{label:"Shinigami — +45% DMG",value:45,sm:0,mm:0},{label:"Player — +40% DMG",value:40,sm:0,mm:0},{label:"Vessel — +35% DMG",value:35,sm:0,mm:0},{label:"Limitless — +30% DMG",value:30,sm:0,mm:0},{label:"Demon — +30% DMG",value:30,sm:0,mm:0},{label:"Vampire — +25% DMG",value:25,sm:0,mm:0},{label:"Orc — +20% DMG",value:20,sm:0,mm:0}];
-const D_CLAN=[{label:"None / No damage clan",value:0},{label:"Alter — +35% DMG ★",value:35},{label:"Pride — +35% DMG",value:35},{label:"Espada — +30% DMG",value:30},{label:"Eminence — +25% DMG",value:25},{label:"Monarch — +20% DMG",value:20},{label:"Celestial — +15% DMG",value:15}];
+const D_CLAN=[{label:"None / No damage clan",value:0},{label:"Upper — +40% DMG, +12% Melee ★",value:40},{label:"Alter — +35% DMG ★",value:35},{label:"Pride — +35% DMG",value:35},{label:"Espada — +30% DMG",value:30},{label:"Eminence — +25% DMG",value:25},{label:"Monarch — +20% DMG",value:20},{label:"Celestial — +15% DMG",value:15}];
 const D_TRAIT=[{label:"None / Common (0%)",value:0,mult:1},{label:"Superior I (+5%)",value:5,mult:1},{label:"Superior II (+7.5%)",value:7.5,mult:1},{label:"Superior III (+10%)",value:10,mult:1},{label:"Reaper I (+20%)",value:20,mult:1},{label:"Reaper II (+30%)",value:30,mult:1},{label:"Reaper III (+40%)",value:40,mult:1},{label:"Reaper IV (+50%)",value:50,mult:1},{label:"Reaper V (+60%)",value:60,mult:1},{label:"Malevolent — ×1.80",value:0,mult:1.8},{label:"Singularity — ×2.10",value:0,mult:2.1},{label:"Cataclysm — ×2.30",value:0,mult:2.3},{label:"Celestial T1 — +80%, ×2.20",value:80,mult:2.2},{label:"Celestial T2 — +100%, ×2.20",value:100,mult:2.2},{label:"Celestial T3 — +120%, ×2.20",value:120,mult:2.2},{label:"Celestial T4 Max — +130%, ×2.20",value:130,mult:2.2},{label:"Emperor — +130%",value:130,mult:1}];
-const D_SPEC=[{label:"None",value:0},{label:"Fortune Chosen ✦✦ (5–12.5%)",value:12.5,range:true,min:5,max:12.5},{label:"Executioner ✦✦ (30–45%)",value:45,range:true,min:30,max:45},{label:"Damage V ✦ (25–35%)",value:35,range:true,min:25,max:35},{label:"Berserker ✦ (20–30%)",value:30,range:true,min:20,max:30},{label:"Eclipse ✦ (10–20%)",value:20,range:true,min:10,max:20},{label:"Damage IV (17.5–25%)",value:25,range:true,min:17.5,max:25},{label:"Damage III (15–20%)",value:20,range:true,min:15,max:20},{label:"Damage II (10–15%)",value:15,range:true,min:10,max:15},{label:"Damage I (5–10%)",value:10,range:true,min:5,max:10}];
+const D_SPEC=[{label:"None",value:0},{label:"Rampage ✦✦ (15–30% DMG)",value:30,range:true,min:15,max:30},{label:"Fortune Chosen ✦✦ (5–12.5%)",value:12.5,range:true,min:5,max:12.5},{label:"Executioner ✦✦ (30–45%)",value:45,range:true,min:30,max:45},{label:"Damage V ✦ (25–35%)",value:35,range:true,min:25,max:35},{label:"Berserker ✦ (20–30%)",value:30,range:true,min:20,max:30},{label:"Eclipse ✦ (10–20%)",value:20,range:true,min:10,max:20},{label:"Damage IV (17.5–25%)",value:25,range:true,min:17.5,max:25},{label:"Damage III (15–20%)",value:20,range:true,min:15,max:20},{label:"Damage II (10–15%)",value:15,range:true,min:10,max:15},{label:"Damage I (5–10%)",value:10,range:true,min:5,max:10}];
 const D_RUNE=[{label:"None",value:0},{label:"Celestial Rune — Max ~120%",value:120,steps:[0,20,40,60,80,100,120],key:"celestial"},{label:"Primordial Rune — Max ~100%",value:100,steps:[0,17,33,50,67,83,100],key:"primordial"},{label:"Havoc Rune — Max ~80%",value:80,steps:[0,13,27,40,53,67,80],key:"havoc"},{label:"Power Rune — Max ~60%",value:60,steps:[0,10,20,30,40,50,60],key:"power"}];
 const D_STAT=[{label:"None / F (0%)",value:0},{label:"E (+5%)",value:5},{label:"D (+7%)",value:7},{label:"C (+10%)",value:10},{label:"B (+12%)",value:12},{label:"A (+15%)",value:15},{label:"S (+17%)",value:17},{label:"SS (+20%)",value:20},{label:"SSS (+25%)",value:25},{label:"Z (+37%)",value:37}];
 const D_AURA=[{label:"None (0%)",value:0},{label:"Common (+5%)",value:5},{label:"Uncommon (+7.5%)",value:7.5},{label:"Rare (+10%)",value:10},{label:"Epic (+12.5%)",value:12.5},{label:"Legendary (+15%)",value:15}];
@@ -274,9 +277,10 @@ const D_HAKI=[{label:"Not unlocked",value:0},{label:"Lv 1 (~10%)",value:10},{lab
 const D_CONQ=[{label:"Not unlocked",value:0},{label:"Lv 1 (~5%)",value:5},{label:"Lv 2 (~10%)",value:10},{label:"Lv 3 (~17%)",value:17},{label:"Lv 4 (~25%)",value:25},{label:"Max (~34%)",value:34}];
 const D_SKILL=[{label:"0 upgrades",value:0},{label:"~5%",value:5},{label:"~10%",value:10},{label:"~15%",value:15},{label:"~20%",value:20},{label:"Max (~25%)",value:25}];
 const D_BLESS=[{label:"Not blessed",value:0},{label:"B1 (~+2.5%)",value:2.5},{label:"B2 (~+5%)",value:5},{label:"B3 (~+7.5%)",value:7.5},{label:"B4 (~+10%)",value:10},{label:"B5 (~+12.5%)",value:12.5},{label:"B6 (~+15%)",value:15},{label:"B7 (~+17.5%)",value:17.5},{label:"B8 (~+20%)",value:20},{label:"B9 (~+22.5%)",value:22.5},{label:"B10 Max (~+25%)",value:25}];
-const D_ACC=[{label:"No accessory / E0",value:0},{label:"E1 (~15%)",value:15},{label:"E2 (~30%)",value:30},{label:"E3 (~45%)",value:45},{label:"E4 (~60%)",value:60},{label:"E5 (~75%)",value:75},{label:"E6 (~85%)",value:85},{label:"E7 (~95%)",value:95},{label:"E8 (~105%)",value:105},{label:"E9 (~110%)",value:110},{label:"E10 Max (~122.5%)",value:122.5}];
-const D_ART=[{label:"No set",value:0},{label:"2-piece partial (~25%)",value:25},{label:"4-piece Abyss (~50%)",value:50},{label:"Full Celestial Rupture Max (~91.9%)",value:91.9}];
-const D_SMAP={haki:D_HAKI,conq:D_CONQ,skill:D_SKILL,boss:D_SKILL,tower:D_SKILL,blessing:D_BLESS,accessory:D_ACC,artifact:D_ART};
+const D_ACC=[{label:"No accessory / E0",value:0},{label:"E1 (~15%)",value:15},{label:"E2 (~30%)",value:30},{label:"E3 (~45%)",value:45},{label:"E4 (~60%)",value:60},{label:"E5 (~75%)",value:75},{label:"E6 (~85%)",value:85},{label:"E7 (~95%)",value:95},{label:"E8 (~105%)",value:105},{label:"E9 (~110%)",value:110},{label:"E10 Max (~125%)",value:125}];
+const D_POWER=[{label:"None",value:0},{label:"Cursebrand ✦✦ (18–30%)",value:30,range:true,min:18,max:30},{label:"Colossus ✦✦ (20–34%)",value:34,range:true,min:20,max:34},{label:"Apex ✦ (10–20%)",value:20,range:true,min:10,max:20},{label:"Abyssal ✦ (14–24%)",value:24,range:true,min:14,max:24},{label:"Eternal ✦ (13–22%)",value:22,range:true,min:13,max:22},{label:"Reaper (8–16%)",value:16,range:true,min:8,max:16},{label:"Tempest (9–18%)",value:18,range:true,min:9,max:18},{label:"Titanborn (7–14%)",value:14,range:true,min:7,max:14},{label:"Wrathful (5–10%)",value:10,range:true,min:5,max:10},{label:"Infernal (6–12%)",value:12,range:true,min:6,max:12},{label:"Ironclad (7–14%)",value:14,range:true,min:7,max:14},{label:"Battleborn (3–6%)",value:6,range:true,min:3,max:6},{label:"Empowered (4–7%)",value:7,range:true,min:4,max:7},{label:"Resolute (3–7%)",value:7,range:true,min:3,max:7},{label:"Fierce (2–5%)",value:5,range:true,min:2,max:5},{label:"Solid (2–4%)",value:4,range:true,min:2,max:4},{label:"Tempered (3–5%)",value:5,range:true,min:3,max:5}];
+const D_ART_S=[{label:"0%",value:0},{label:"~25%",value:25},{label:"~55%",value:55},{label:"~110%",value:110}];
+const D_SMAP={haki:D_HAKI,conq:D_CONQ,skill:D_SKILL,boss:D_SKILL,tower:D_SKILL,blessing:D_BLESS,accessory:D_ACC,artifact:D_ART_S};
 
 const DMG_GROUPS=[
   {title:"Stat Reroll",items:[{id:"stat",name:"Stat Reroll (DMG)",hint:"Stats Reroll NPC — select your damage stat tier",dmg:0,type:"add",statSelect:true}]},
@@ -284,7 +288,7 @@ const DMG_GROUPS=[
   {title:"Race",items:[{id:"race",name:"Race",hint:"Global DMG% + type multiplier",dmg:0,type:"add",raceSelect:true}]},
   {title:"Clan",items:[{id:"clan",name:"Clan",hint:"Alter / Pride / Espada give the most DMG",dmg:0,type:"add",clanSelect:true}]},
   {title:"Accessory",items:[{id:"accessory",name:"Accessory Enchant (E0–E10)",hint:"Best-in-slot accessory",dmg:0,type:"add",stepsSelect:"accessory",stepsOnly:true}]},
-  {title:"Artifact",items:[{id:"artifact",name:"Artifact Set Bonus",hint:"Celestial Rupture or Abyss set",dmg:0,type:"add",stepsSelect:"artifact",stepsOnly:true}]},
+  {title:"Artifact",items:[{id:"artifact",name:"Artifact Set Bonus",hint:"Abyssal set — ~110%",dmg:0,type:"add",stepsSelect:"artifact",range:true,min:0,max:110,step:0.5}]},
   {title:"Rune",items:[{id:"rune",name:"Rune",hint:"Select your damage rune then pick upgrade level",dmg:0,type:"add",runeSelect:true}]},
   {title:"Title",items:[{id:"title",name:"Damage Title",hint:"Select your equipped title",dmg:0,type:"add",titleSelect:true}]},
   {title:"Haki",items:[{id:"haki",name:"Armament Haki",hint:"Unlocked on Snow Island",dmg:0,type:"add",stepsSelect:"haki",stepsOnly:true}]},
@@ -294,19 +298,20 @@ const DMG_GROUPS=[
   {title:"Cosmetic",items:[{id:"cosmetic",name:"Cosmetic",hint:"Any equipped cosmetic gives +15% DMG",dmg:0,type:"add",cosmeticSelect:true}]},
   {title:"Spec Passive",items:[{id:"spec",name:"Spec",hint:"Judgement Island",dmg:0,type:"add",specSelect:true}]},
   {title:"Blessing",items:[{id:"blessing",name:"Blessing",hint:"Bless NPC at Shibuya",dmg:0,type:"add",stepsSelect:"blessing",stepsOnly:true}]},
+  {title:"Power",items:[{id:"power",name:"Power",hint:"Lawless Island",dmg:0,type:"add",powerSelect:true}]},
   {title:"Boss Rush",items:[{id:"boss",name:"Boss Rush DMG Upgrades",hint:"Boss Rush Upgrades NPC, Sailor Island",dmg:0,type:"add",stepsSelect:"boss",stepsOnly:true}]},
   {title:"Infinite Tower",items:[{id:"tower",name:"Infinite Tower DMG Upgrades",hint:"Tower Upgrades NPC at Tower Island",dmg:0,type:"add",stepsSelect:"tower",stepsOnly:true}]},
 ];
 const dS={};
 DMG_GROUPS.forEach(g=>g.items.forEach(it=>{dS[it.id]={checked:false,value:it.dmg,type:it.type};}));
 
-function dCalc(){let a=0,tm=1,ty=1;DMG_GROUPS.forEach(g=>g.items.forEach(it=>{const s=dS[it.id];if(!s.checked)return;if(it.id==='trait'){a+=s.value||0;tm=s.traitMult||1;}else if(it.id==='race'){a+=s.value||0;const tv=buildType==='sword'?(s.sm||0):(s.mm||0);if(tv>0)ty*=(1+tv/100);}else if(it.id==='spec'){a+=s.specRangeVal!==undefined?s.specRangeVal:(s.value||0);}else{a+=s.value||0;}}));return{add:a,traitMult:tm,typeMult:ty};}
+function dCalc(){let a=0,tm=1,ty=1;DMG_GROUPS.forEach(g=>g.items.forEach(it=>{const s=dS[it.id];if(!s.checked)return;if(it.id==='trait'){a+=s.value||0;tm=s.traitMult||1;}else if(it.id==='race'){a+=s.value||0;const tv=buildType==='sword'?(s.sm||0):(s.mm||0);if(tv>0)ty*=(1+tv/100);}else if(it.id==='spec'||it.id==='power'){a+=s.specRangeVal!==undefined?s.specRangeVal:(s.value||0);}else{a+=s.value||0;}}));return{add:a,traitMult:tm,typeMult:ty};}
 
 function dmgUpdatePanel(){
   const el=document.getElementById('dmg-brows');el.innerHTML='';
   DMG_GROUPS.forEach(g=>g.items.forEach(it=>{
     const s=dS[it.id];const r=document.createElement('div');r.className='brow';
-    const av=it.id==='spec'?(s.specRangeVal!==undefined?s.specRangeVal:s.value):(s.value||0);
+    const av=(it.id==='spec'||it.id==='power')?(s.specRangeVal!==undefined?s.specRangeVal:s.value):(s.value||0);
     r.innerHTML=`<span class="bl">${it.name}</span><span class="${!s.checked||av===0?'bv off':'bv gold'}">${!s.checked||av===0?'+—':'+'+av.toFixed(1)+'%'}</span>`;el.appendChild(r);
     if(it.id==='race'&&s.checked){const sv=s.sm||0,mv=s.mm||0;if(sv>0||mv>0){const tv=buildType==='sword'?sv:mv;const lb=buildType==='sword'?'↳ Sword Multi':'↳ Melee Multi';const tr2=document.createElement('div');tr2.className='brow';tr2.innerHTML=`<span class="bl" style="font-size:12px;padding-left:8px">${lb}</span><span class="${tv>0?(buildType==='sword'?'bv blue':'bv orange'):'bv off'}">${tv>0?'×'+(1+tv/100).toFixed(2):'×—'}</span>`;el.appendChild(tr2);}}
     if(it.id==='trait'&&s.checked&&(s.traitMult||1)>1){const tr2=document.createElement('div');tr2.className='brow';tr2.innerHTML=`<span class="bl" style="font-size:12px;padding-left:8px">↳ Trait DMG Mult</span><span class="bv purple">×${(s.traitMult).toFixed(2)}</span>`;el.appendChild(tr2);}
@@ -317,7 +322,7 @@ function dmgUpdatePanel(){
   document.getElementById('dmg-bar-txt').textContent=add.toFixed(1)+'%';
 }
 
-function dTiers(it){return it.titleSelect?D_TITLE:it.raceSelect?D_RACE:it.clanSelect?D_CLAN:it.specSelect?D_SPEC:it.runeSelect?D_RUNE:it.statSelect?D_STAT:it.traitSelect?D_TRAIT:it.auraSelect?D_AURA:it.cosmeticSelect?D_COSM:null;}
+function dTiers(it){return it.titleSelect?D_TITLE:it.raceSelect?D_RACE:it.clanSelect?D_CLAN:it.specSelect?D_SPEC:it.runeSelect?D_RUNE:it.statSelect?D_STAT:it.traitSelect?D_TRAIT:it.auraSelect?D_AURA:it.cosmeticSelect?D_COSM:it.powerSelect?D_POWER:null;}
 
 function dmgRender(){
   const c=document.getElementById('dmg-checklist');c.innerHTML='';
@@ -327,15 +332,16 @@ function dmgRender(){
     const list=document.createElement('div');list.className='item-list';
     group.items.forEach(it=>{
       const s=dS[it.id];const row=document.createElement('div');row.className='item dmg-item'+(s.checked?' checked':'');
-      const tiers=dTiers(it);const sType=it.titleSelect?'title':it.raceSelect?'race':it.clanSelect?'clan':it.specSelect?'spec':it.runeSelect?'rune':it.statSelect?'stat':it.traitSelect?'trait':it.auraSelect?'aura':it.cosmeticSelect?'cosmetic':null;
+      const tiers=dTiers(it);const sType=it.titleSelect?'title':it.raceSelect?'race':it.clanSelect?'clan':it.specSelect?'spec':it.runeSelect?'rune':it.statSelect?'stat':it.traitSelect?'trait':it.auraSelect?'aura':it.cosmeticSelect?'cosmetic':it.powerSelect?'power':null;
       let rHTML='';
       if(it.stepsSelect){
         const steps=D_SMAP[it.stepsSelect];let ci=0;steps.forEach((st,i)=>{if(st.value<=s.value)ci=i;});
         const opts=steps.map((st,i)=>`<option value="${st.value}"${i===ci?' selected':''}>${st.label}</option>`).join('');
-        rHTML=`<div class="item-right" style="min-width:220px"><select class="title-select" id="ds-${it.id}" onclick="event.stopPropagation()">${opts}</select></div>`;
+        const sliderHTML=it.range?`<div class="range-combo" style="margin-top:4px"><input type="range" min="${it.min||0}" max="${it.max||100}" step="${it.step||1}" value="${s.value||0}" id="dslr-${it.id}" onclick="event.stopPropagation()"><input type="number" class="num-input" min="${it.min||0}" max="${it.max||100}" step="${it.step||1}" value="${s.value||0}" id="dslrn-${it.id}" onclick="event.stopPropagation()"><span class="num-unit">%</span></div>`:'';
+        rHTML=`<div class="item-right" style="min-width:220px"><select class="title-select" id="ds-${it.id}" onclick="event.stopPropagation()">${opts}</select>${sliderHTML}</div>`;
       } else if(sType){
         const opts=tiers.map(t=>`<option value="${t.value}"${t.label===(s.selectedLabel||'')?' selected':''}>${t.label}</option>`).join('');
-        const specRange=(sType==='spec'&&s.value>0)?`<div class="range-combo" style="margin-top:4px"><input type="range" min="0" max="${s.value}" step="0.1" value="${s.specRangeVal||s.value}" id="dsr-${it.id}" onclick="event.stopPropagation()"><input type="number" class="num-input" min="0" max="${s.value}" step="0.1" value="${s.specRangeVal||s.value}" id="dsrn-${it.id}" onclick="event.stopPropagation()"><span class="num-unit">%</span></div>`:'';
+        const specRange=((sType==='spec'||sType==='power')&&s.value>0)?`<div class="range-combo" style="margin-top:4px"><input type="range" min="0" max="${s.value}" step="0.1" value="${s.specRangeVal||s.value}" id="dsr-${it.id}" onclick="event.stopPropagation()"><input type="number" class="num-input" min="0" max="${s.value}" step="0.1" value="${s.specRangeVal||s.value}" id="dsrn-${it.id}" onclick="event.stopPropagation()"><span class="num-unit">%</span></div>`:'';
         let badge='';
         if(sType==='race'){const ch=D_RACE.find(t=>t.label===(s.selectedLabel||''));if(ch){if((ch.sm||0)>0)badge=`<span class="type-badge sword">+${ch.sm}% Sword Multi</span>`;else if((ch.mm||0)>0)badge=`<span class="type-badge melee">+${ch.mm}% Melee Multi</span>`;}}
         if(sType==='trait'){const ch=D_TRAIT.find(t=>t.label===(s.selectedLabel||''));if(ch&&(ch.mult||1)>1)badge=`<span class="type-badge trait">×${ch.mult.toFixed(2)} Mult</span>`;}
@@ -347,14 +353,17 @@ function dmgRender(){
       row.innerHTML=`<div class="cb">${CB}</div><div class="item-body"><div class="item-name">${it.name}</div><div class="item-hint">${it.hint}</div></div>${rHTML}`;
 
       if(it.stepsSelect){
-        const ss=row.querySelector(`#ds-${it.id}`);
-        ss.addEventListener('change',e=>{s.value=parseFloat(e.target.value);s.checked=s.value>0;row.classList.toggle('checked',s.checked);dmgUpdatePanel();});
-        row.addEventListener('click',ev=>{if(ev.target===ss||ss.contains(ev.target))return;if(s.value>0){s.checked=!s.checked;row.classList.toggle('checked',s.checked);dmgUpdatePanel();}});
+        const ss=row.querySelector(`#ds-${it.id}`),sl=row.querySelector(`#dslr-${it.id}`),ni=row.querySelector(`#dslrn-${it.id}`);
+        function dSyncSlider(v){v=Math.min(Math.max(v,it.min||0),it.max||100);s.value=v;if(sl)sl.value=v;if(ni)ni.value=v;s.checked=v>0;row.classList.toggle('checked',s.checked);const steps=D_SMAP[it.stepsSelect];let bi=0;steps.forEach((st,i)=>{if(st.value<=v)bi=i;});ss.selectedIndex=bi;dmgUpdatePanel();}
+        ss.addEventListener('change',e=>dSyncSlider(parseFloat(e.target.value)));
+        if(sl)sl.addEventListener('input',e=>dSyncSlider(parseFloat(e.target.value)));
+        if(ni){ni.addEventListener('input',e=>{const v=parseFloat(e.target.value);if(!isNaN(v))dSyncSlider(v);});ni.addEventListener('blur',e=>{const v=parseFloat(e.target.value);dSyncSlider(isNaN(v)?s.value:v);});}
+        row.addEventListener('click',ev=>{if([ss,sl,ni].filter(Boolean).some(el=>ev.target===el||el.contains(ev.target)))return;if(s.value>0){s.checked=!s.checked;row.classList.toggle('checked',s.checked);dmgUpdatePanel();}});
       } else if(sType){
         const sel=row.querySelector(`#dsel-${it.id}`),sr=row.querySelector(`#dsr-${it.id}`),srn=row.querySelector(`#dsrn-${it.id}`),ru=row.querySelector(`#dru-${it.id}`);
         sel.addEventListener('change',e=>{
           const ch=tiers.find(t=>t.label===e.target.options[e.target.selectedIndex].text);s.selectedLabel=ch?ch.label:'';
-          if(sType==='spec'&&ch&&ch.range){s.value=ch.max;s.specRangeVal=ch.max;}
+          if((sType==='spec'||sType==='power')&&ch&&ch.range){s.value=ch.max;s.specRangeVal=ch.max;}
           else if(sType==='rune'){s.runeKey=ch&&ch.key?ch.key:null;s.value=ch?(ch.steps?ch.steps[ch.steps.length-1]:ch.value):0;}
           else if(sType==='trait'){s.value=ch?ch.value:0;s.traitMult=ch?(ch.mult||1):1;}
           else if(sType==='race'){s.value=ch?ch.value:0;s.sm=ch?(ch.sm||0):0;s.mm=ch?(ch.mm||0):0;}
